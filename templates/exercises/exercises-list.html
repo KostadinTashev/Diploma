@@ -1,0 +1,44 @@
+<!-- templates/exercises/exercises_list.html -->
+
+<h1>Всички упражнения</h1>
+
+<a href="{% url 'exercise add' %}" class="btn btn-primary" style="margin-bottom: 20px; display: inline-block;">
+     Добави упражнение
+</a>
+
+<div class="exercises-container">
+    {% for exercise in exercises %}
+        <div class="exercise-card">
+        <a href="{% url 'exercise details' exercise.id exercise.name %}"><h2>{{ exercise.name }}</h2></a>
+
+            <p><strong>Категория:</strong> {{ exercise.get_category_display }}</p>
+            {% if exercise.equipment %}
+                <p><strong>Оборудване:</strong> {{ exercise.equipment }}</p>
+            {% endif %}
+            {% if exercise.description %}
+                <p>{{ exercise.description }}</p>
+            {% else %}
+                <p>Няма описание.</p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>Все още няма упражнения.</p>
+    {% endfor %}
+</div>
+
+<style>
+.exercises-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.exercise-card {
+    border: 1px solid #ccc;
+    padding: 15px;
+    width: 280px;
+    border-radius: 8px;
+    box-shadow: 2px 2px 8px #ddd;
+    background-color: #fff;
+}
+</style>

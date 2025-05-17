@@ -1,0 +1,23 @@
+{#{% extends 'base/base.html' %}#}
+
+{% block page_content %}
+<div class="container mt-5">
+    {% if trainer %}
+        <div class="card mx-auto shadow" style="width: 80%; transition: 0.3s;">
+            <img src="{{ trainer.user.profile_picture }}" class="card-img-top" alt="{{ trainer.user.full_name }}"
+                 style="height: 400px; object-fit: cover; object-position: center;">
+            <div class="card-body text-center">
+                <h3 class="card-title">{{ trainer.user.full_name }}</h3>
+                <p class="card-text"><strong>Специалност:</strong> {{ trainer.get_speciality_display }}</p>
+                <p class="card-text"><strong>Опит:</strong> {{ trainer.years_of_experience }} години</p>
+                <p class="card-text"><strong>Телефон:</strong> {{ trainer.phone_number }}</p>
+                <p class="card-text"><strong>Описание:</strong> {{ trainer.description }}</p>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-warning text-center" role="alert">
+            Все още нямате избран треньор.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

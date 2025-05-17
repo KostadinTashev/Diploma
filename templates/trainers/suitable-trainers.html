@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Подходящи треньори</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+
+    <div class="container">
+        <h1>Подходящи треньори</h1>
+        <p>Треньори, които специализират в целта: <strong>{{ goal }}</strong></p>
+
+        <div class="row">
+            {% for trainer in suitable_trainers %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ trainer.user.profile_picture }}" alt="{{ trainer.user.full_name }}">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'trainer details' trainer.id trainer.user.first_name %}">
+                                    {{ trainer.user.full_name|default:trainer.user.username }}
+                                </a>
+                            </h5>
+                            <p class="card-text"><strong>Специалност:</strong> {{ trainer.get_speciality_display }}</p>
+                            <p class="card-text"><strong>Опит:</strong> {{ trainer.years_of_experience }} години</p>
+                            <p class="card-text"><strong>Телефон:</strong> {{ trainer.phone_number }}</p>
+                        </div>
+                        <div class="card-footer">
+                            <a href="{% url 'choose trainer' trainer.id %}" class="btn">Избери този треньор</a>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12 text-center">
+                    <p>Няма треньори за показване.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+</html>

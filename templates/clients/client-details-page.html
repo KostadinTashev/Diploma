@@ -1,0 +1,10 @@
+<h2>Профил на клиента: {{ client.user.username }}</h2>
+
+<ul>
+    {% for entry in progress_data %}
+        <li>{{ entry.progress_date }} — {{ entry.weight }} кг</li>
+    {% empty %}
+        <li>Няма данни за прогрес</li>
+    {% endfor %}
+</ul>
+

@@ -1,0 +1,21 @@
+<!-- templates/training_programs/program_list.html -->
+
+<h1>Тренировъчни програми</h1>
+
+<a href="{% url 'workout add' %}" class="btn btn-primary" style="margin-bottom: 20px; display: inline-block;">
+    Добави нова програма
+</a>
+
+{% if programs %}
+    <ul>
+        {% for program in programs %}
+            <li>
+                <a href="{% url 'workout details' program.pk %}">{{ program.program_name }}</a> — {{ program.category }}
+                (<a href="{% url 'workout edit' program.pk %}">Редактирай</a> |
+                 <a href="{% url 'workout delete' program.pk %}">Изтрий</a>)
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Все още няма добавени тренировъчни програми.</p>
+{% endif %}

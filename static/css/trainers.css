@@ -1,0 +1,75 @@
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card img {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+}
+
+.card-body {
+    padding: 20px;
+    text-align: center;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    color: #555;
+    font-size: 1rem;
+    margin-bottom: 5px;
+}
+
+.card-footer {
+    padding: 10px;
+    background-color: #f8f9fa;
+}
+
+.card-footer .btn {
+    width: 100%;
+    background-color: #e63946;
+    border: none;
+    padding: 10px;
+    font-size: 1rem;
+    color: #fff;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.card-footer .btn:hover {
+    background-color: #d62828;
+}
+
+/* Стилове за линковете */
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Мобилни устройства */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 20px;
+    }
+    .card-title {
+        font-size: 1.25rem;
+    }
+}

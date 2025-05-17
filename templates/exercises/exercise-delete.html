@@ -1,0 +1,8 @@
+<h1>Изтриване на упражнение: {{ exercise.name }}</h1>
+<p>Сигурни ли сте, че искате да изтриете това упражнение?</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Да, изтрий</button>
+    <a href="{% url 'exercise details' exercise.pk exercise.name %}">Отказ</a>
+</form>

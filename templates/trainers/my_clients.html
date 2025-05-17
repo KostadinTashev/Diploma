@@ -1,0 +1,18 @@
+<div class="container mt-5">
+    <h1>Моите клиенти</h1>
+    <ul class="list-group">
+        {% for client in clients %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>
+                    {{ client.user.first_name }} {{ client.user.last_name }}
+                </span>
+                <div>
+                    <a class="btn btn-primary btn-sm" href="{% url 'client details' client.id client.user.username %}">Детайли</a>
+                    <a class="btn btn-success btn-sm" href="{% url 'assign program' client.id %}">Назначи програма</a>
+                </div>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Нямате свързани клиенти.</li>
+        {% endfor %}
+    </ul>
+</div>

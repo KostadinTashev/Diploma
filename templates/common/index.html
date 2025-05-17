@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>FitZone – Начало</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero {
+            background: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b') center/cover no-repeat;
+            color: black;
+            padding: 6rem 2rem;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+            transition: 0.3s;
+        }
+
+        footer {
+            background-color: #212529;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{% url 'index' %}">Фитнес приложение</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link active" href="{% url 'index' %}">Начало</a></li>
+                <li class="nav-item"><a class="nav-link" href="#services">Услуги</a></li>
+                <li class="nav-item"><a class="nav-link" href="#contact">Контакт</a></li>
+                {% if user.is_authenticated %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'logout user' %}">Изход</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link" href="{% url 'login user' %}">Вход</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="hero">
+    <div class="container">
+        <h1>Постигни най-добрата си форма</h1>
+        <p>С нашите експертни треньори и персонализирани програми</p>
+        {% if not request.user.is_authenticated %}
+            <a href="{% url 'register user' %}" class="btn btn-danger btn-lg mt-3">Регистрирай се</a>
+            <a href="{% url 'login user' %}" class="btn btn-danger btn-lg mt-3">Вход</a>
+        {% else %}
+
+            <a href="{% url 'logout user' %}" class="btn btn-danger btn-lg mt-3">Изход</a>
+        {% endif %}
+
+    </div>
+</section>
+
+<section class="py-5" id="services">
+    <div class="container text-center">
+        <h2 class="mb-5">Нашите услуги</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Персонални тренировки</h5>
+                        <p class="card-text">Програми, изготвени според твоите цели и ниво.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Хранителни планове</h5>
+                        <p class="card-text">Диети, съобразени с тренировките и твоето тяло.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">Прогрес и статистики</h5>
+                        <p class="card-text">Следи теглото, мускулната маса и мазнините си лесно.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h2 class="mb-5">Галерия</h2>
+        <div class="row g-3">
+            <div class="col-md-4"><img src="https://source.unsplash.com/400x300/?fitness" class="img-fluid rounded"
+                                       alt="Фитнес 1"></div>
+            <div class="col-md-4"><img src="https://source.unsplash.com/400x300/?gym" class="img-fluid rounded"
+                                       alt="Фитнес 2"></div>
+            <div class="col-md-4"><img src="https://source.unsplash.com/400x300/?workout" class="img-fluid rounded"
+                                       alt="Фитнес 3"></div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5">
+    <div class="container text-center">
+        <h2 class="mb-5">Срещни нашите треньори</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" class="card-img-top" alt="Треньор 1">
+                    <div class="card-body">
+                        <h5 class="card-title">Иван Георгиев</h5>
+                        <p class="card-text">Сертифициран фитнес инструктор с 10 години опит.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <img src="https://randomuser.me/api/portraits/women/45.jpg" class="card-img-top" alt="Треньор 2">
+                    <div class="card-body">
+                        <h5 class="card-title">Мария Петрова</h5>
+                        <p class="card-text">Специалист по хранене и кондиционен коуч.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm">
+                    <img src="https://randomuser.me/api/portraits/men/66.jpg" class="card-img-top" alt="Треньор 3">
+                    <div class="card-body">
+                        <h5 class="card-title">Георги Колев</h5>
+                        <p class="card-text">Персонален треньор и състезател по културизъм.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5 bg-light">
+    <div class="container text-center">
+        <h2 class="mb-5">Какво казват нашите клиенти</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <blockquote class="blockquote">
+                    <p>“С FitZone успях да сваля 10 кг и да вляза във форма за 3 месеца!”</p>
+                    <footer class="blockquote-footer">Петя Димитрова</footer>
+                </blockquote>
+            </div>
+            <div class="col-md-4">
+                <blockquote class="blockquote">
+                    <p>“Персоналните треньори са много внимателни и мотивиращи.”</p>
+                    <footer class="blockquote-footer">Иван Петров</footer>
+                </blockquote>
+            </div>
+            <div class="col-md-4">
+                <blockquote class="blockquote">
+                    <p>“Най-доброто фитнес място в града! Отлични условия.”</p>
+                    <footer class="blockquote-footer">Анелия Костова</footer>
+                </blockquote>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="py-5" id="contact">
+    <div class="container">
+        <h2 class="text-center mb-5">Свържи се с нас</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Име</label>
+                        <input type="text" class="form-control" id="name" placeholder="Въведете вашето име">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Имейл</label>
+                        <input type="email" class="form-control" id="email" placeholder="example@domain.com">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message" class="form-label">Съобщение</label>
+                        <textarea class="form-control" id="message" rows="4"
+                                  placeholder="Вашето съобщение..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Изпрати</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2025 FitZone. Всички права запазени.</p>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

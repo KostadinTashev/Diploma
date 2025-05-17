@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Назначи програма</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light py-4">
+<div class="container">
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Затвори"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card shadow">
+        <div class="card-body">
+            <h3 class="mb-4">Назначи програма на {{ client.user.full_name }}</h3>
+
+            <form method="post">
+                {% csrf_token %}
+                {{ formset.management_form }}
+
+                <div id="formset">
+                    {% for form in formset %}
+                        <div class="row mb-3 border p-3 bg-light rounded program-form">
+                            <div class="col-md-6">
+                                {{ form.workout.label_tag }}
+                                {{ form.workout }}
+                                {% if form.workout.errors %}
+                                    <div class="text-danger">{{ form.workout.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                {{ form.day_of_week.label_tag }}
+                                {{ form.day_of_week }}
+                                {% if form.day_of_week.errors %}
+                                    <div class="text-danger">{{ form.day_of_week.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                {% if form.instance.pk %}
+                                    <div class="form-check">
+                                        {{ form.DELETE }}
+                                        <label class="form-check-label">Премахни упражнението</label>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <button type="button" class="btn btn-outline-primary mb-3" onclick="addForm()">Добави тренировка</button>
+                <br>
+                <button type="submit" class="btn btn-success">Запази</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    function addForm() {
+        const formset = document.getElementById("formset");
+        const totalForms = document.getElementById("id_form-TOTAL_FORMS");
+        const currentFormCount = parseInt(totalForms.value);
+
+        const lastForm = formset.querySelector(".program-form:last-child");
+        const newForm = lastForm.cloneNode(true);
+
+        newForm.querySelectorAll("input, select, label").forEach(el => {
+            if (el.name) {
+                el.name = el.name.replace(/form-\d+-/, `form-${currentFormCount}-`);
+            }
+            if (el.id) {
+                el.id = el.id.replace(/form-\d+-/, `form-${currentFormCount}-`);
+            }
+            if (el.tagName === "SELECT" || el.tagName === "INPUT") {
+                if (el.type === "checkbox" || el.type === "radio") {
+                    el.checked = false;
+                } else {
+                    el.value = "";
+                }
+            }
+        });
+
+        // Премахваме DELETE checkbox от новата форма (тя няма още instance)
+        const deleteCheck = newForm.querySelector(".form-check");
+        if (deleteCheck) {
+            deleteCheck.remove();
+        }
+
+        formset.appendChild(newForm);
+        totalForms.value = currentFormCount + 1;
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

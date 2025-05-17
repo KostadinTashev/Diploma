@@ -1,0 +1,25 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitnessApp</title>
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+<nav class="navbar">
+    <div class="navbar-container">
+        <a href="{% url 'index' %}" class="logo">FitnessApp</a>
+        <ul class="nav-links">
+            {% if not request.user.is_authenticated %}
+                <li><a href="{% url 'register user' %}">Регистрация</a></li>
+                <li><a href="{% url 'login user' %}">Вход</a></li>
+            {% else %}
+                <li><a href="{% url 'logout user' %}">Изход</a></li>
+            {% endif %}
+        </ul>
+    </div>
+</nav>
+</body>
+</html>

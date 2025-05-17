@@ -1,0 +1,18 @@
+{% load static %}
+
+{% block page_content %}
+    <div class="container mt-5">
+        <div class="card shadow p-4 mx-auto" style="max-width: 600px;">
+            <h2 class="text-center mb-4">Редактиране на профил</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-success">Запази промените</button>
+                    <button type="submit" name="delete" class="btn btn-danger"
+                            onclick="return confirm('Сигурен ли си, че искаш да изтриеш профила си?');">Изтрий профила
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

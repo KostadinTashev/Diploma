@@ -1,0 +1,61 @@
+<div class="profile-container">
+    <h1>Профил на треньора</h1>
+
+    <div class="profile-details">
+        <p><strong>Име:</strong> {{ trainer.user.first_name }}</p>
+        <p><strong>Фамилия:</strong> {{ trainer.user.last_name }}</p>
+        <p><strong>Имейл:</strong> {{ trainer.user.email }}</p>
+        <p><strong>Телефон:</strong> {{ trainer.phone_number }}</p>
+        <p><strong>Специализация:</strong> {{ trainer.specialty }}</p>
+        <p><strong>Описание:</strong> {{ trainer.description }}</p>
+    </div>
+
+    <div class="profile-actions">
+        <a href="{% url 'trainer edit' trainer.id trainer.user.username %}" class="btn btn-primary">Редактирай профила</a>
+        <form action="{% url 'trainer delete' trainer.id trainer.user.username%}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Сигурен ли си, че искаш да изтриеш профила си?')">Изтрий профила
+            </button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .profile-container {
+        max-width: 800px;
+        margin: auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-details p {
+        font-size: 18px;
+        margin-bottom: 10px;
+    }
+
+    .profile-actions {
+        margin-top: 30px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        text-decoration: none;
+        border: none;
+        border-radius: 5px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 16px;
+        margin-right: 10px;
+    }
+
+    .btn-primary {
+        background-color: #007bff;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+    }
+</style>

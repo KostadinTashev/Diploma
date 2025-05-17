@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Добави прогрес</title>
+</head>
+<body>
+<h2>Добави ново тегло</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Запази</button>
+</form>
+<a href="{% url 'progress chart' %}">Виж графиката</a>
+</body>
+</html>

@@ -1,0 +1,18 @@
+
+<h1>{{ exercise.name }}</h1>
+
+<p><strong>Категория:</strong> {{ exercise.get_category_display }}</p>
+
+{% if exercise.equipment %}
+    <p><strong>Оборудване:</strong> {{ exercise.equipment }}</p>
+{% endif %}
+
+{% if exercise.description %}
+    <p>{{ exercise.description }}</p>
+{% else %}
+    <p>Няма описание.</p>
+{% endif %}
+
+<a href="{% url 'exercise edit' exercise.pk exercise.name %}">Редактирай упражнението</a> |
+<a href="{% url 'exercise delete' exercise.pk exercise.name %}">Изтрий упражнението</a> |
+<a href="{% url 'exercises' %}">Обратно към списъка с упражнения</a>

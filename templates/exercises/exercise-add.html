@@ -1,0 +1,8 @@
+<h1>Добавяне на упражнение</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Запази</button>
+    <a href="{% url 'exercises' %}" class="btn btn-secondary">Отказ</a>
+</form>

@@ -1,0 +1,26 @@
+{% load static %}
+
+{% block page_content %}
+    <div class="container mt-5">
+        <div class="card shadow p-4 mx-auto" style="max-width: 700px;">
+            <h2 class="text-center mb-4">Редактиране на профил</h2>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <h4>Лични данни</h4>
+                {{ user_form.as_p }}
+
+                <hr>
+                <h4>Телесни измервания и цели</h4>
+                {{ client_form.as_p }}
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" name="save" class="btn btn-success">Запази промените</button>
+                    <button type="submit" name="delete" class="btn btn-danger"
+                            onclick="return confirm('Сигурен ли си, че искаш да изтриеш профила си?');">
+                        Изтрий профила
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

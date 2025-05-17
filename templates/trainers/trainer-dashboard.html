@@ -1,0 +1,53 @@
+{% load static %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <h1>Добре дошъл, {{ trainer.user.first_name }}!</h1>
+
+        <div class="dashboard-nav">
+            <ul>
+                <li><a href="{% url 'trainer clients' trainer.id %}">👥 Моите клиенти</a></li>
+                <li><a href="{% url 'workout list' %}">🏋️‍♂️ Тренировки</a></li>
+{#                <li><a href="{% url 'assign program' client.id %}">📋 Програма</a></li>#}
+
+                <li><a href="{% url 'exercises' %}">📋 Упражнения</a></li>
+                <li><a href="{% url 'trainer details' trainer.id trainer.user.username %}">🧑‍💼 Профил</a></li>
+
+            </ul>
+        </div>
+
+        <div class="dashboard-content">
+            <p>Избери секция от менюто отляво, за да управляваш съдържанието.</p>
+        </div>
+    </div>
+
+    <style>
+        .dashboard-container {
+            max-width: 800px;
+            margin: auto;
+            padding: 40px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-nav ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .dashboard-nav ul li {
+            margin: 15px 0;
+        }
+
+        .dashboard-nav ul li a {
+            text-decoration: none;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .dashboard-nav ul li a:hover {
+            color: #007bff;
+        }
+    </style>
+{% endblock %}

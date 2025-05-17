@@ -1,22 +1,16 @@
-"""
-URL configuration for fitness_app project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
-# from django.contrib import admin
-from django.urls import path
+from django.contrib import admin
+from django.urls import path, include
 
 urlpatterns = [
-    #    path('admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
+    path('', include('fitness_app.common.urls')),
+    path('accounts/', include('fitness_app.accounts.urls')),
+    path('clients/', include('fitness_app.clients.urls')),
+    path('exercises/', include('fitness_app.exercises.urls')),
+    path('meals/', include('fitness_app.meals.urls')),
+    path('program_exercises/', include('fitness_app.program_exercises.urls')),
+    path('nutrition_plans/', include('fitness_app.nutrition_plans.urls')),
+    path('progress/', include('fitness_app.progress.urls')),
+    path('trainers/', include('fitness_app.trainers.urls')),
+    path('workouts/', include('fitness_app.workouts.urls')),
 ]

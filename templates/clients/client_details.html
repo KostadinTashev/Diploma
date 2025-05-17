@@ -1,0 +1,34 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block page_content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 mx-auto" style="max-width: 600px; border-radius: 20px;">
+        <div class="text-center mb-4">
+            <img src="{% if client.user.profile_picture %}{{ client.user.profile_picture.url }}{% else %}{% static 'images/default-icon.jpg' %}{% endif %}"
+                 class="rounded-circle border border-3 border-primary"
+                 alt="Профилна снимка"
+                 width="150"
+                 height="150"
+                 style="object-fit: cover;">
+        </div>
+
+        <h3 class="text-center fw-bold">{{ client.user.first_name }} {{ client.user.last_name }}</h3>
+        <p class="text-center text-muted mb-4">{{ client.user.email }}</p>
+
+        <div class="list-group list-group-flush">
+            <div class="list-group-item d-flex justify-content-between">
+                <strong>Пол:</strong> <span>{{ client.user.get_gender_display }}</span>
+            </div>
+            <div class="list-group-item d-flex justify-content-between">
+                <strong>Дата на раждане:</strong> <span>{{ client.user.birth_date|date:"d.m.Y" }}</span>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a href="{% url 'client edit' %}" class="btn btn-outline-primary w-50">Редактирай профил</a>
+            <a href="{% url 'client delete' %}" class="btn btn-outline-danger w-50">Изтрий профила</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load static %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="container mt-5">
+    <h3 class="text-center mb-4">Прогрес на {{ client.user.full_name }}</h3>
+    <canvas id="progressChart"></canvas>
+</div>
+
+<script>
+    const labels = {{ dates|safe }};
+    const weights = {{ weights|safe }};
+    const bodyFat = {{ body_fat|safe }};
+    const muscleMass = {{ muscle_mass|safe }};
+
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Килограми',
+                    data: weights,
+                    borderColor: 'blue',
+                    fill: false
+                },
+                {
+                    label: 'Мазнини (%)',
+                    data: bodyFat,
+                    borderColor: 'red',
+                    fill: false
+                },
+                {
+                    label: 'Мускулна маса',
+                    data: muscleMass,
+                    borderColor: 'green',
+                    fill: false
+                }
+            ]
+        }
+    });
+</script>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}FitZone{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+</head>
+<body>
+
+<header class="site-header">
+    <div class="container">
+        <nav class="main-nav">
+            <ul>
+                {% if not user.is_trainer %}
+                    <li><a href="{% url 'dashboard' user.client.id user.username %}">Начало</a></li>
+                    <li><a href="{% url 'my trainer' %}">Треньор</a></li>
+                    <li><a href="{% url 'client edit' %}">Профил</a></li>
+                    <li><a href="{% url 'logout user' %}">Изход</a></li>
+                {% else %}
+                    <li><a href="{% url 'login user' %}">Вход</a></li>
+                    <li><a href="{% url 'register user' %}">Регистрация</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<main class="page-content container">
+    {% block page_content %}
+    {% endblock %}
+</main>
+
+<footer class="site-footer">
+    <div class="container">
+        <p>&copy; 2025 FitZone. Всички права запазени.</p>
+    </div>
+</footer>
+
+</body>
+</html>
