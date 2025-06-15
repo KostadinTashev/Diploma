@@ -1,72 +1,209 @@
+{% load dict_extras %}
 {% load static %}
 
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Клиентски панел | FitZone</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Клиентски панел | Сила+</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet"/>
+    <link href="{% static 'css/client-dashboard.css' %}">
 </head>
 <body>
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-md-3 p-3 bg-light">
+    <div class="row min-vh-100">
+        <nav class="col-md-3 p-3 bg-light d-flex flex-column align-items-center">
+            {% if user.profile.image %}
+                <img src="{{ user.profile.image.url }}" alt="Аватар на {{ user.get_full_name }}" class="avatar"/>
+            {% else %}
+                <div class="avatar bg-secondary text-white d-flex justify-content-center align-items-center fs-4">
+                    {{ user.first_name|default:"?"|slice:":1" }}{{ user.last_name|default:"?"|slice:":1" }}
+                </div>
+            {% endif %}
+            <p class="mb-4 text-center fw-semibold">{{ user.get_full_name }}</p>
+
             <h3 class="text-center mb-4">Навигация</h3>
-            <ul class="nav flex-column">
+            <ul class="nav flex-column w-100">
                 <li class="nav-item">
-                    <a href="{% url 'current progress' client_id=client.pk %}" class="nav-link active">Прогрес</a>
+                    <a href="{% url 'current progress' client_id=client.pk %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'current progress' %}active{% endif %}">
+                        <i class="bi bi-bar-chart-fill me-2"></i>Прогрес
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="{% url 'client workouts' client.pk client.user.username %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'client workouts' %}active{% endif %}">
+                        <i class="bi bi-person-badge me-2"></i>Тренировки
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Тренировки</a>
+                    <a href="{% url 'calorie calculator' %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'calorie calculator' %}active{% endif %}">
+                        <i class="bi bi-calculator me-2"></i>Калориен Калкулатор
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a href="#" class="nav-link">Хранителен режим</a>
+                    <a href="{% url 'my trainer' %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'my trainer' %}active{% endif %}">
+                        <i class="bi bi-person-workspace me-2"></i>Треньор
+                    </a>
                 </li>
+
                 <li class="nav-item">
-                    <a href="{% url 'my trainer' %}" class="nav-link">Треньор</a>
+                    <a href="{% url 'client settings' client.id client.user.username %}"
+                       class="nav-link {% if request.resolver_match.url_name == 'client settings' %}active{% endif %}">
+                        <i class="bi bi-gear me-2"></i>Настройки
+                    </a>
                 </li>
-                <li class="nav-item">
-                    <a href="{% url 'client details' client.id request.user.username %}" class="nav-link">Настройки</a>
-                </li>
-                <li class="nav-item">
-                    <a href="{% url 'logout user' %}" class="nav-link text-danger">Изход</a>
+                <li class="nav-item mt-auto">
+                    <a href="{% url 'logout user' %}" class="nav-link text-danger">
+                        <i class="bi bi-box-arrow-right me-2"></i>Изход
+                    </a>
                 </li>
             </ul>
-        </div>
+        </nav>
 
-        <div class="col-md-9 p-4">
+        <main class="col-md-9 p-4 bg-white">
             <h1>Добре дошли, {{ user.first_name }}!</h1>
-            <p>Това е вашият клиентски панел, където можете да следите прогреса, тренировките, хранителния режим и да се
-                свържете с вашия треньор.</p>
+
 
             <div class="mt-5">
-                <h3>Вашият прогрес:</h3>
-                <div class="progress" style="height: 30px;">
-                    <div class="progress-bar" role="progressbar" style="width: 60%;" aria-valuenow="60"
-                         aria-valuemin="0" aria-valuemax="100">60%
-                    </div>
+                <h3 class="text-center text-primary fw-bold mb-4">
+                    <i class="bi bi-calendar-check"></i> Вашите тренировки по дни
+                </h3>
+
+                <div class="d-flex flex-wrap gap-3 justify-content-center mt-4">
+                    {% for day, workouts in workouts_by_day.items %}
+                        <div class="card shadow-lg rounded p-4 text-center" style="min-width: 250px;">
+                            <h5 class="text-primary fw-bold">{{ day|translate_day }}</h5>
+                            <hr class="my-2">
+                            <ul class="list-unstyled">
+                                {% for entry in workouts %}
+                                    <li class="mb-2">
+                                        <a href="{% url 'workout details' entry.workout.pk %}"
+                                           class="btn btn-outline-primary btn-sm rounded-pill shadow-sm">
+                                            <i class="bi bi-dumbbell"></i> {{ entry.workout.program_name }}
+                                        </a>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
                 </div>
             </div>
 
-            <div class="mt-5">
-                <h3>Вашите тренировки:</h3>
-                <p>Тук ще бъдат показани вашите текущи и предстоящи тренировки.</p>
-            </div>
 
             <div class="mt-5">
-                <h3>Хранителен режим:</h3>
-                <p>Вашият персонализиран хранителен режим ще бъде тук.</p>
+
+
+                <div class="mt-5">
+                    <h3>Хранителен режим по дни:</h3>
+
+                    {% if meals_by_day %}
+                        <div class="accordion" id="nutritionPlanAccordion">
+                            {% for day, meals in meals_by_day.items %}
+                                <div class="accordion-item mb-3 shadow-sm">
+                                    <h2 class="accordion-header" id="heading-{{ forloop.counter }}">
+                                        <button class="accordion-button collapsed fs-5 py-3 px-4" type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#collapse-{{ forloop.counter }}"
+                                                aria-expanded="false"
+                                                aria-controls="collapse-{{ forloop.counter }}">
+                                            {{ day|date:"l, d.m.Y" }}
+                                        </button>
+                                    </h2>
+                                    <div id="collapse-{{ forloop.counter }}"
+                                         class="accordion-collapse collapse"
+                                         aria-labelledby="heading-{{ forloop.counter }}"
+                                         data-bs-parent="#nutritionPlanAccordion">
+                                        <div class="accordion-body bg-light">
+                                            {% for meal in meals %}
+                                                <div class="mb-4 p-3 border-start border-4 border-primary rounded shadow-sm bg-white">
+                                                    <h5 class="text-secondary">{{ meal.meal }}
+                                                        - {{ meal.description }}</h5>
+
+                                                    <ul class="list-group list-group-flush">
+                                                        {% for item in meal.food_items.all %}
+                                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                                {{ item.product.name }}
+                                                                <span class="badge bg-primary rounded-pill">{{ item.quantity }} г</span>
+                                                            </li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">Все още няма добавен хранителен режим.</p>
+                    {% endif %}
+                </div>
             </div>
 
-            <div class="mt-5">
-                <h3>Свържете се с треньора:</h3>
-                <p>Тук ще можете да се свържете с вашия треньор.</p>
-            </div>
-        </div>
+            <section class="py-5 bg-light rounded shadow-sm">
+                <div class="container text-center">
+                    <h2 class="fw-bold mb-4 text-warning">Оцени приложението</h2>
+
+                    {% if existing_review %}
+                        <p class="text-muted">Вече сте оценили приложението с {{ existing_review.rating }} звезди.</p>
+                    {% else %}
+                        <form method="post" action="{% url 'submit_app_review' %}">
+                            {% csrf_token %}
+                            <div class="mb-3 star-rating">
+                                {% for i in "12345" %}
+                                    <i class="bi bi-star" data-value="{{ i }}"></i>
+                                {% endfor %}
+                                <input type="hidden" name="rating" id="rating-input" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <textarea name="comment" class="form-control shadow-sm" rows="3"
+                                          placeholder="Оставете отзив..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-custom px-4 shadow-sm"><i
+                                    class="bi bi-send-fill"></i> Изпрати отзив
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </section>
+
+            <section class="py-5">
+                <div class="container">
+                    <h2 class="fw-bold text-center mb-4">Какво казват клиентите</h2>
+
+                    {% if reviews %}
+                        <div class="row g-4">
+                            {% for review in reviews %}
+                                <div class="col-md-4">
+                                    <div class="card shadow-sm border-0 p-3">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-star-fill text-warning fs-3"></i>
+                                            <span class="ms-2 fw-semibold">{{ review.rating }} ⭐</span>
+                                        </div>
+                                        <p class="text-muted">{{ review.comment }}</p>
+                                        <small class="text-secondary">{{ review.client.user.get_full_name }}</small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted text-center">Все още няма оставени отзиви.</p>
+                    {% endif %}
+                </div>
+            </section>
+        </main>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/client-dashboard.js' %}"></script>
 </body>
 </html>

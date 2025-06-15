@@ -1,0 +1,319 @@
+{% extends 'base/base.html'%}
+
+{% load form_tags %}
+{% load custom_filters %}
+{% load static %}
+{% block page_content %}
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Редактирай хранителен режим</title>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <style>
+
+
+h2, h3, h4, h5 {
+    color: #212529;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.meal-block {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.meal-block:hover {
+    transform: scale(1.01);
+}
+
+button[type="submit"],
+.add-food-btn,
+#add-meal-btn {
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-top: 20px;
+}
+
+button:hover,
+.add-food-btn:hover,
+#add-meal-btn:hover {
+    background: linear-gradient(90deg, #0056b3, #007bff);
+    transform: scale(1.04);
+}
+
+.remove-meal-btn,
+.remove-food-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 6px 10px;
+    font-size: 14px;
+    float: right;
+    margin-top: -10px;
+    margin-right: -10px;
+    transition: background 0.3s ease;
+}
+
+.remove-meal-btn:hover,
+.remove-food-btn:hover {
+    background-color: #bb2d3b;
+}
+
+.food-item {
+    background: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+}
+
+.food-item label {
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+.food-item input[type="text"],
+.food-item input[type="number"],
+.food-item select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    margin-top: 4px;
+}
+
+button[type="submit"] {
+    display: block;
+    width: auto;
+    margin: 30px auto 0 auto;
+}
+
+.add-food-btn {
+    margin-top: 10px;
+    background: #17a2b8;
+    border-radius: 25px;
+}
+.delete-checkbox {
+    display: none !important;
+}
+.add-food-btn:hover {
+    background: #138496;
+}
+
+    </style>
+</head>
+<body>
+
+<form method="post" id="nutrition-edit-form" novalidate>
+    {% csrf_token %}
+    <h2>Редактирай хранителен режим за {{ client.user.full_name }}</h2>
+
+    {{ plan_form.as_p }}
+
+    <h3>Хранения</h3>
+    {{ meal_formset.management_form }}
+    <div id="meals-container">
+        {% for meal_form in meal_formset %}
+            <div class="meal-block" data-index="{{ forloop.counter0 }}">
+                <button type="button" class="remove-meal-btn" title="Изтрий хранене">🗑</button>
+                <h4>Хранене {{ forloop.counter }}</h4>
+                {{ meal_form.as_p }}
+
+                {% with food_formset=food_formsets|index:forloop.counter0 %}
+                    {{ food_formset.management_form }}
+                    <h5>Продукти:</h5>
+                    <div class="food-items-container">
+                        {% for form in food_formset %}
+                            <div class="food-item">
+                                {{ form.id }}
+
+                                {{ form.product_name.label_tag }} {{ form.product_name }}
+{{ form.product }}
+
+                                {{ form.quantity.label_tag }} {{ form.quantity }}
+
+                                {% if form.DELETE %}
+                                    {{ form.DELETE|add_class:"delete-checkbox" }}
+                                {% endif %}
+
+                                <button type="button" class="remove-food-btn" title="Изтрий продукт">✖</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="add-food-btn" data-meal-index="{{ forloop.counter0 }}">➕ Добави още продукт</button>
+                {% endwith %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" id="add-meal-btn">➕ Добави още хранене</button>
+    <br><br>
+    <button type="submit">💾 Запази промените</button>
+</form>
+
+<div id="meal-template" style="display: none;">
+    <div class="meal-block" data-index="__prefix__">
+        <button type="button" class="remove-meal-btn" title="Изтрий хранене">🗑</button>
+        <h4>Хранене __number__</h4>
+        {{ empty_meal_form.as_p|safe }}
+
+        {{ empty_food_formset.management_form|safe }}
+        <h5>Продукти:</h5>
+        <div class="food-items-container">
+            {% for form in empty_food_formset %}
+                <div class="food-item">
+                    <label for="id_foods-__prefix__-product_name">Продукт</label>
+                    <input type="text" class="product-name-input" id="id_foods-__prefix__-product_name" />
+                    <input type="hidden" name="foods-__prefix__-product" class="product-id-input" id="id_foods-__prefix__-product" />
+
+                    {{ form.quantity.label_tag }} {{ form.quantity }}
+
+                    <input type="checkbox" name="foods-__prefix__-DELETE" class="delete-checkbox" style="display:none;" />
+
+                    <button type="button" class="remove-food-btn" title="Изтрий продукт">✖</button>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="add-food-btn" data-meal-index="__prefix__">➕ Добави още продукт</button>
+    </div>
+</div>
+
+<div id="food-item-template" style="display:none;">
+    <div class="food-item">
+        <label for="__prefix__-product_name">Продукт</label>
+        <input type="text" class="product-name-input" id="__prefix__-product_name" />
+        <input type="hidden" name="" class="product-id-input" id="__prefix__-product" />
+
+        <label for="__prefix__-quantity">Количество</label>
+        <input type="number" name="" id="__prefix__-quantity" min="1" />
+
+        <input type="checkbox" name="" style="display:none;" class="delete-checkbox" />
+
+        <button type="button" class="remove-food-btn" title="Изтрий продукт">✖</button>
+    </div>
+</div>
+
+<script>
+$(function () {
+    function activateAutocomplete() {
+        $(".product-name-input").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "{% url 'autocomplete products' %}",
+                    dataType: "json",
+                    data: { term: request.term },
+                    success: function(data) {
+                        response(data.map(item => ({
+                            label: item.name,
+                            value: item.name,
+                            id: item.id
+                        })));
+                    }
+                });
+            },
+            minLength: 1,
+            delay: 300,
+            select: function(event, ui) {
+                $(this).val(ui.item.value);
+                $(this).siblings(".product-id-input").val(ui.item.id);
+                return false;
+            },
+            change: function(event, ui) {
+                if (!ui.item) {
+                    $(this).siblings(".product-id-input").val("");
+                }
+            }
+        });
+    }
+
+    activateAutocomplete();
+
+    $("#add-meal-btn").on("click", function () {
+        let mealsContainer = $("#meals-container");
+        let totalMealForms = $("#id_meals-TOTAL_FORMS");
+        let index = parseInt(totalMealForms.val());
+
+        let newMealHtml = $("#meal-template").html()
+            .replace(/__prefix__/g, index)
+            .replace(/__number__/g, index + 1);
+
+        mealsContainer.append(newMealHtml);
+        totalMealForms.val(index + 1);
+
+        activateAutocomplete();
+    });
+
+    $("#meals-container").on("click", ".add-food-btn", function () {
+        let mealIndex = $(this).data("meal-index");
+        let mealBlock = $(`.meal-block[data-index="${mealIndex}"]`);
+        let totalFoodsInput = mealBlock.find(`#id_foods-${mealIndex}-TOTAL_FORMS`);
+
+        if (!totalFoodsInput.length) return;
+
+        let totalFoods = parseInt(totalFoodsInput.val());
+        let foodContainer = mealBlock.find(".food-items-container");
+
+        let newFoodHtml = $("#food-item-template").html()
+            .replace(/__prefix__-product_name/g, `foods-${mealIndex}-${totalFoods}-product_name`)
+            .replace(/__prefix__-product/g, `foods-${mealIndex}-${totalFoods}-product`)
+            .replace(/__prefix__-quantity/g, `foods-${mealIndex}-${totalFoods}-quantity`)
+            .replace(/__prefix__-DELETE/g, `foods-${mealIndex}-${totalFoods}-DELETE`);
+
+        foodContainer.append(newFoodHtml);
+
+        let newFoodItem = foodContainer.children().last();
+
+        newFoodItem.find(".product-id-input").attr("name", `foods-${mealIndex}-${totalFoods}-product`);
+        newFoodItem.find("input[type=number]").attr("name", `foods-${mealIndex}-${totalFoods}-quantity`);
+        newFoodItem.find(".delete-checkbox").attr("name", `foods-${mealIndex}-${totalFoods}-DELETE`);
+
+        totalFoodsInput.val(totalFoods + 1);
+
+        activateAutocomplete();
+    });
+
+    $("#meals-container").on("click", ".remove-meal-btn", function () {
+        let mealBlock = $(this).closest(".meal-block");
+        let totalMealForms = $("#id_meals-TOTAL_FORMS");
+        let index = mealBlock.data("index");
+
+        let deleteCheckbox = mealBlock.find('input[type="checkbox"][name$="-DELETE"]');
+        if (deleteCheckbox.length) {
+            deleteCheckbox.prop("checked", true);
+            mealBlock.hide();
+        } else {
+            mealBlock.remove();
+            totalMealForms.val(parseInt(totalMealForms.val()) - 1);
+        }
+    });
+
+    $("#meals-container").on("click", ".remove-food-btn", function () {
+        let foodItem = $(this).closest(".food-item");
+        let deleteCheckbox = foodItem.find("input.delete-checkbox");
+        if (deleteCheckbox.length) {
+            deleteCheckbox.prop("checked", true);
+            foodItem.hide();
+        } else {
+            foodItem.remove();
+        }
+    });
+});
+</script>
+{% endblock %}

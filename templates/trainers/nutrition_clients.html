@@ -1,0 +1,96 @@
+{% extends 'base/base.html' %}
+{% block page_content %}
+    <div class="nutrition-clients-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <a href="{% url 'trainer dashboard' trainer.id trainer.user.username %}"
+               class="btn btn-outline-secondary btn-sm rounded-pill fw-semibold">
+                Назад
+            </a>
+            <h2 class="fw-bold text-primary m-0">
+                <i class="bi bi-person-lines-fill"></i> Клиенти с хранителни планове
+            </h2>
+
+        </div>
+        <ul class="client-list">
+            {% for client in clients %}
+                <li class="client-item d-flex align-items-center justify-content-between">
+                    <div>
+                        <i class="bi bi-person-circle text-info"></i> <strong>{{ client.user.full_name }}</strong>
+                    </div>
+                    <div class="d-flex gap-2">
+                        {% if client.nutrition_plans.all %}
+                            {% for plan in client.nutrition_plans.all %}
+                                <a href="{% url 'plan details' plan.id %}" class="btn btn-outline-info btn-sm">📄
+                                    Детайли</a>
+                                <a href="{% url 'plan edit' plan.id %}" class="btn btn-outline-warning btn-sm">✏️
+                                    Редактирай</a>
+                            {% endfor %}
+                        {% else %}
+                            <a href="{% url 'create nutrition plan' client.id %}"
+                               class="btn btn-outline-success btn-sm">➕ Създай план</a>
+                        {% endif %}
+                    </div>
+                </li>
+            {% empty %}
+                <li class="empty-message text-center">🔴 Нямаш добавени клиенти.</li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <style>
+        .nutrition-clients-container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            transform: translateY(-15px);
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .client-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .client-item {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            transition: background 0.3s ease-in-out, transform 0.3s ease-in-out;
+        }
+
+        .client-item:hover {
+            background: #e3f2fd;
+            transform: scale(1.02);
+            border-radius: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .btn-sm:hover {
+            transform: scale(1.1);
+        }
+
+        .empty-message {
+            padding: 15px;
+            font-style: italic;
+            color: #dc3545;
+        }
+    </style>
+
+{% endblock %}

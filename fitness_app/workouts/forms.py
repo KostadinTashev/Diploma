@@ -25,6 +25,9 @@ class WorkoutExerciseForm(forms.ModelForm):
         }
 
 WorkoutExerciseFormSet = inlineformset_factory(
-    Workout, WorkoutExercise, form=WorkoutExerciseForm,
-    extra=1, can_delete=True
+    Workout,
+    WorkoutExercise,
+    form=WorkoutExerciseForm,
+    extra=1,
+    can_delete=True
 )

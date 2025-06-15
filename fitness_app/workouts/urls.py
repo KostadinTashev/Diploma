@@ -8,5 +8,6 @@ urlpatterns = [
         path('', workout_details, name='workout details'),
         path('edit/', workout_edit, name='workout edit'),
         path('delete/', workout_delete, name='workout delete'),
-    ]))
+    ])),
+
 ]

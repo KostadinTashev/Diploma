@@ -1,0 +1,255 @@
+{% extends 'base/base.html' %}
+
+{% load form_tags %}
+{% load static %}
+{% block page_content %}
+    <style>
+        .autocomplete-suggestions {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            background: white;
+            position: absolute;
+            z-index: 1000;
+            width: 100%;
+        }
+
+        .autocomplete-suggestion {
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+    <div class="container py-4">
+        <div class="d-flex justify-content-start mb-3">
+            <a class="btn btn-outline-secondary btn-sm rounded-pill shadow-sm px-3"
+               href="{% url 'dashboard' user.client.id user.username %}">
+                <i class="bi bi-arrow-left-circle"></i> Назад
+            </a>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <h1 class="text-primary fw-bold">Калориен Калкулатор</h1>
+        </div>
+
+        <form method="post" id="meal-form" novalidate>
+            {% csrf_token %}
+            {{ formset.management_form }}
+
+            <div class="mb-3">
+                {{ meal_form.date.label_tag }}
+                {{ meal_form.date|add_class:"form-control rounded-pill shadow-sm" }}
+            </div>
+
+            <div class="mb-3">
+                {{ meal_form.meal.label_tag }}
+                {{ meal_form.meal|add_class:"form-select rounded-pill shadow-sm" }}
+            </div>
+
+            <h3 class="text-secondary fw-semibold">Продукти</h3>
+
+            <div id="food-items-container">
+                {% for form in formset %}
+                    <div class="food-item row mb-2 position-relative">
+                        <div class="col-md-6">
+                            {{ form.product_name.label_tag }}
+                            {{ form.product_name|add_class:"form-control product-autocomplete rounded shadow-sm" }}
+                            <div class="autocomplete-suggestions" style="display:none;"></div>
+                        </div>
+                        <div class="col-md-3">
+                            {{ form.quantity.label_tag }}
+                            {{ form.quantity|add_class:"form-control rounded shadow-sm" }}
+                        </div>
+
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="button"
+                                    class="btn btn-outline-danger btn-sm rounded-pill shadow-sm remove-item">
+                                <i class="bi bi-trash"></i> Премахни
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between my-3">
+                <button type="button" class="btn btn-outline-dark btn-sm rounded-pill shadow-sm px-3"
+                        id="add-product-btn">
+                    <i class="bi bi-plus-circle"></i> Добави хранене
+                </button>
+
+                <button type="submit" class="btn btn-success btn-sm rounded-pill shadow-sm px-3">
+                    <i class="bi bi-check-circle"></i> Запази
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <hr>
+    <div class="mt-5 justify-content-center mb-3 d-flex">
+        <a href="{% url 'meal history' %}" class="btn text-bg-warning">
+            <i class="bi bi-clock-history"></i> История на храненията
+        </a>
+    </div>
+
+    <h2>Оставащи калории и макронутриенти за днес</h2>
+    <ul>
+        <li>Калории: {{ calories_left }}</li>
+        <li>Протеини: {{ proteins_left }} г</li>
+        <li>Мазнини: {{ fats_left }} г</li>
+        <li>Въглехидрати: {{ carbohydrate_left }} г</li>
+    </ul>
+
+    <hr>
+
+    <h2>Хранения за {{ meal_form.date.value|default_if_none:current_date|date:"d.m.Y" }}</h2>
+
+    {% if grouped_meals %}
+        {% for meal_type, meals in grouped_meals.items %}
+            <h3>{{ meal_type }}</h3>
+            <div class="list-group mb-4">
+                {% for meal in meals %}
+                    <div class="list-group-item position-relative">
+                        <div class="position-absolute top-0 end-0 mt-2 me-2 d-flex gap-1">
+                            <a href="{% url 'edit meal client' meal.id %}"
+                               class="btn btn-outline-warning btn-sm px-2 py-1" title="Редактирай">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+
+                            <form method="post" action="{% url 'delete meal client' meal.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-outline-danger btn-sm px-2 py-1" title="Изтрий"
+                                        onclick="return confirm('Сигурни ли сте, че искате да изтриете това хранене?');">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                        {% if meal.food_items.all %}
+                            <ul>
+                                {% for item in meal.food_items.all %}
+                                    <li>
+                                        Калории: {{ item.get_calories }} kcal,
+                                        Протеини: {{ item.get_proteins }} г,
+                                        Мазнини: {{ item.get_fats }} г,
+                                        Въглехидрати: {{ item.get_carbohydrates }} г<br>
+                                        {{ item.product.name }} – {{ item.quantity }} г
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>Няма добавени продукти.</p>
+                        {% endif %}
+
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>Няма добавени хранения за днес.</p>
+    {% endif %}
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function setupAutocomplete($input) {
+            const $container = $input.closest('.food-item');
+            const $suggestions = $container.find('.autocomplete-suggestions');
+
+            $input.on('input', function () {
+                const query = $(this).val();
+                if (query.length < 2) {
+                    $suggestions.empty().hide();
+                    return;
+                }
+
+                $.ajax({
+                    url: "{% url 'autocomplete products' %}",
+                    data: {term: query},
+                    success: function (data) {
+                        $suggestions.empty();
+                        if (!data.length) {
+                            $suggestions.hide();
+                            return;
+                        }
+                        data.forEach(function (item) {
+                            const $div = $('<div class="autocomplete-suggestion"></div>').text(item.name);
+                            $div.on('click', function () {
+                                $input.val(item.name);
+                                $suggestions.empty().hide();
+                            });
+                            $suggestions.append($div);
+                        });
+                        $suggestions.show();
+                    }
+                });
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.food-item').length) {
+                    $suggestions.empty().hide();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.product-autocomplete').each(function () {
+                setupAutocomplete($(this));
+            });
+
+            $('#add-product-btn').on('click', function () {
+                const formCount = $('#food-items-container .food-item').length;
+                const newForm = `
+            <div class="food-item row mb-2 position-relative">
+                <div class="col-md-6">
+                    <label for="id_form-${formCount}-product_name">Продукт:</label>
+                    <input type="text" name="form-${formCount}-product_name" class="form-control product-autocomplete" id="id_form-${formCount}-product_name" autocomplete="off">
+                    <div class="autocomplete-suggestions" style="display:none;"></div>
+                </div>
+                <div class="col-md-3">
+                    <label for="id_form-${formCount}-quantity">Количество (г):</label>
+                    <input type="number" step="0.01" name="form-${formCount}-quantity" class="form-control" id="id_form-${formCount}-quantity">
+                </div>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="button"
+                                    class="btn btn-outline-danger btn-sm rounded-pill shadow-sm remove-item">
+                                <i class="bi bi-trash"></i> Премахни
+                            </button>
+                </div>
+            </div>
+            `;
+                $('#food-items-container').append(newForm);
+
+                setupAutocomplete($('#id_form-' + formCount + '-product_name'));
+
+                $('#id_form-TOTAL_FORMS').val(formCount + 1);
+            });
+
+            $('#food-items-container').on('click', '.remove-item', function () {
+                $(this).closest('.food-item').remove();
+
+                $('#food-items-container .food-item').each(function (index) {
+                    $(this).find('input, label').each(function () {
+                        if ($(this).attr('for')) {
+                            const newFor = $(this).attr('for').replace(/form-\d+/, 'form-' + index);
+                            $(this).attr('for', newFor);
+                        }
+                        if ($(this).attr('id')) {
+                            const newId = $(this).attr('id').replace(/form-\d+/, 'form-' + index);
+                            $(this).attr('id', newId);
+                        }
+                        if ($(this).attr('name')) {
+                            const newName = $(this).attr('name').replace(/form-\d+/, 'form-' + index);
+                            $(this).attr('name', newName);
+                        }
+                    });
+                });
+
+                const formsCount = $('#food-items-container .food-item').length;
+                $('#id_form-TOTAL_FORMS').val(formsCount);
+            });
+        });
+    </script>
+
+
+{% endblock %}

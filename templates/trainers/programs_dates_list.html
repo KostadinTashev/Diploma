@@ -1,0 +1,14 @@
+<h2>Избери дата за програмата на {{ client.user.get_full_name }}</h2>
+
+<ul class="list-group">
+    {% for date in dates %}
+        <li class="list-group-item d-flex justify-content-between">
+            {{ date|date:"d F Y" }}
+            <a href="{% url 'programs_for_date' client.id date %}" class="btn btn-outline-primary btn-sm">
+                Виж
+            </a>
+        </li>
+    {% empty %}
+        <li class="list-group-item">Няма налични дати за програма.</li>
+    {% endfor %}
+</ul>

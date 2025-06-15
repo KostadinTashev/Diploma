@@ -1,0 +1,121 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block page_content %}
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4">
+            <h2 class="text-center mb-4 text-primary fw-bold"><i class="bi bi-gear"></i> Настройки на профила</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert {% if message.tags == 'error' %}alert-danger{% else %}alert-success{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <h4 class="text-center mb-3">Лични данни</h4>
+
+                <div class="mb-4 text-center">
+                    <div class="position-relative d-flex flex-column align-items-center">
+                        {% if client.user.profile_picture %}
+                            <img src="{{ client.user.profile_picture.url }}"
+                                 class="shadow-sm img-thumbnail"
+                                 style="width: 200px; height: 200px; object-fit: cover; border-radius: 10px;"
+                                 alt="Профил">
+                        {% else %}
+                            <img src="{% static 'images/default-icon.jpg' %}"
+                                 class="rounded-circle shadow-sm img-thumbnail"
+                                 width="120" height="120" alt="Профил">
+                        {% endif %}
+
+                        <input type="file" name="profile_image" id="profile_image" class="form-control mt-2 w-50">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">Име</label>
+                    <input type="text" name="first_name" id="first_name" class="form-control shadow-sm w-50"
+                           value="{{ client.user.first_name }}">
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Фамилия</label>
+                    <input type="text" name="last_name" id="last_name" class="form-control shadow-sm w-50"
+                           value="{{ client.user.last_name }}">
+                </div>
+                <div class="mb-3">
+                    <label for="gender" class="form-label">Пол</label>
+                    <select name="gender" id="gender" class="form-control shadow-sm w-50">
+                        <option value="Мъж" {% if client.user.gender == "Мъж" %}selected{% endif %}>Мъж</option>
+                        <option value="Жена" {% if client.user.gender == "Жена" %}selected{% endif %}>Жена</option>
+                        <option value="Друго" {% if client.user.gender == "Друго" %}selected{% endif %}>Друго</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="birth_date" class="form-label">Дата на раждане</label>
+                    <input type="date" name="birth_date" id="birth_date" class="form-control shadow-sm w-50"
+                           value="{{ client.user.birth_date|date:'Y-m-d' }}">
+                </div>
+
+                <h4 class="text-center mt-4 mb-3">Настройки на акаунта</h4>
+
+                <div class="mb-3">
+                    <label for="email" class="form-label">Имейл</label>
+                    <input type="email" name="email" id="email" class="form-control shadow-sm w-50"
+                           value="{{ client.user.email }}">
+                </div>
+                <div class="mb-3 position-relative">
+                    <label for="password" class="form-label">Нова парола</label>
+                    <input type="password" name="password" id="password" class="form-control shadow-sm w-50">
+                    <span class="position-absolute top-50 end-0 translate-middle pe-3">
+                    <i class="bi bi-eye-slash" id="togglePassword"></i>
+                </span>
+                </div>
+                <div class="mb-3 position-relative">
+                    <label for="confirm_password" class="form-label">Потвърди парола</label>
+                    <input type="password" name="confirm_password" id="confirm_password"
+                           class="form-control shadow-sm w-50">
+                    <span class="position-absolute top-50 end-0 translate-middle pe-3">
+                    <i class="bi bi-eye-slash" id="toggleConfirmPassword"></i>
+                </span>
+                </div>
+
+                <hr class="my-4">
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'dashboard' client.id client.user.username %}"
+                       class="btn btn-outline-secondary rounded-pill shadow-sm px-4">
+                        <i class="bi bi-arrow-left-circle"></i> Назад
+                    </a>
+                    <button type="submit" class="btn btn-success rounded-pill shadow-sm px-4">
+                        <i class="bi bi-save"></i> Запази промените
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            function togglePasswordVisibility(toggleId, inputId) {
+                const toggleIcon = document.getElementById(toggleId);
+                const inputField = document.getElementById(inputId);
+                toggleIcon.addEventListener("click", function () {
+                    if (inputField.type === "password") {
+                        inputField.type = "text";
+                        toggleIcon.classList.replace("bi-eye-slash", "bi-eye");
+                    } else {
+                        inputField.type = "password";
+                        toggleIcon.classList.replace("bi-eye", "bi-eye-slash");
+                    }
+                });
+            }
+
+            togglePasswordVisibility("togglePassword", "password");
+            togglePasswordVisibility("toggleConfirmPassword", "confirm_password");
+        });
+    </script>
+{% endblock %}

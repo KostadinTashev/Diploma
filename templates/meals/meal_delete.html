@@ -1,0 +1,8 @@
+  <h2>Потвърди изтриването</h2>
+  <p>Сигурен ли си, че искаш да изтриеш "{{ meal.meal }}" на {{ meal.date }}?</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Да, изтрий</button>
+    <a href="{% url 'all meals' %}">Отказ</a>
+  </form>

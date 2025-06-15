@@ -1,0 +1,11 @@
+  <h2>Хранене: {{ meal.meal }}</h2>
+  <p><strong>Дата:</strong> {{ meal.date }}</p>
+  <p><strong>Описание:</strong> {{ meal.description }}</p>
+  <p><strong>Калории:</strong> {{ meal.calories }}</p>
+  <p><strong>Въглехидрати:</strong> {{ meal.carbohydrate }}</p>
+  <p><strong>Мазнини:</strong> {{ meal.fats }}</p>
+  <p><strong>Протеини:</strong> {{ meal.proteins }}</p>
+
+  <a href="{% url 'meal edit' pk=meal.pk %}">Редактирай</a> |
+  <a href="{% url 'meal delete' pk=meal.pk %}">Изтрий</a> |
+  <a href="{% url 'all meals' %}">Назад</a>

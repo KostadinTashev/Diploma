@@ -1,0 +1,32 @@
+
+<h2>Търсене на храна (Open Food Facts)</h2>
+
+<form method="get" action="">
+    <input type="text" name="q" placeholder="Въведи храна (напр. ябълка)" value="{{ request.GET.q }}">
+    <button type="submit">Търси</button>
+</form>
+
+{% if products and products.products %}
+    <ul>
+        {% for product in products.products %}
+            <li>
+                <strong>{{ product.product_name }}</strong> –
+                {{ product.nutriments.energy_100g|default:"няма данни" }} kcal / 100g
+
+                <form method="post" action="{% url 'import_product' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="code" value="{{ product.code }}">
+                    <input type="hidden" name="name" value="{{ product.product_name }}">
+                    <input type="hidden" name="calories" value="{{ product.nutriments.energy_100g|default:0 }}">
+                    <input type="hidden" name="carbs" value="{{ product.nutriments.carbohydrates_100g|default:0 }}">
+                    <input type="hidden" name="fats" value="{{ product.nutriments.fat_100g|default:0 }}">
+                    <input type="hidden" name="proteins" value="{{ product.nutriments.proteins_100g|default:0 }}">
+                    <button type="submit">Импортирай</button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% elif request.GET.q %}
+    <p>Няма резултати за "{{ request.GET.q }}"</p>
+{% endif %}
+

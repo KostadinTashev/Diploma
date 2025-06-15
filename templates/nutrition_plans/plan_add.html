@@ -1,0 +1,243 @@
+{% load custom_filters %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <title>Създай хранителен режим</title>
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <style>
+        body { max-width: 900px; margin: 2rem auto; font-family: sans-serif; }
+        h2, h3, h4, h5 { color: #333; }
+        .meal-block { background: #fff; padding: 15px 20px; margin-bottom: 25px; border: 1px solid #ddd; border-radius: 6px; }
+        .add-food-btn, #add-meal-btn, button[type="submit"] {
+            background-color: #28a745; color: white; padding: 10px 18px;
+            border-radius: 5px; border: none; cursor: pointer;
+            margin-top: 10px;
+        }
+        .food-items-container > div {
+            margin-bottom: 10px;
+        }
+        .food-item label {
+            display: block;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        .food-item input[type=text], .food-item input[type=number] {
+            width: 200px;
+            padding: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<form method="post" id="nutrition-form" novalidate>
+    {% csrf_token %}
+    <h2>Създай хранителен режим за {{ client.user.full_name }}</h2>
+
+    {{ plan_form.as_p }}
+
+    <h3>Добави хранения</h3>
+    {{ meal_formset.management_form }}
+    <div id="meals-container">
+        {% for meal_form in meal_formset %}
+            <div class="meal-block" data-index="{{ forloop.counter0 }}">
+                <button type="button" class="remove-meal-btn">🗑 Изтрий хранене</button>
+                <h4>Хранене {{ forloop.counter }}</h4>
+                {{ meal_form.as_p }}
+
+                {% with food_formset=food_formsets|index:forloop.counter0 %}
+                    {{ food_formset.management_form }}
+                    <h5>Продукти:</h5>
+                    <div class="food-items-container">
+                        {% for form in food_formset %}
+                            <div class="food-item">
+                                <label for="{{ form.product.id_for_label }}_name">Продукт</label>
+                                <input type="text" class="product-name-input" id="{{ form.product.id_for_label }}_name" />
+                                <input type="hidden" name="{{ form.product.html_name }}" class="product-id-input" id="{{ form.product.id_for_label }}" />
+
+                                {{ form.quantity.label_tag }} {{ form.quantity }}
+
+                                {{ form.DELETE }}
+
+                                <button type="button" class="remove-food-btn">✖</button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" class="add-food-btn" data-meal-index="{{ forloop.counter0 }}">➕ Добави още продукт</button>
+                {% endwith %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" id="add-meal-btn">➕ Добави още хранене</button>
+    <br><br>
+    <button type="submit">✅ Създай режим</button>
+</form>
+
+<!-- шаблон за ново хранене -->
+<div id="meal-template" style="display: none;">
+    <div class="meal-block" data-index="__prefix__">
+        <button type="button" class="remove-meal-btn">🗑 Изтрий хранене</button>
+        <h4>Хранене __number__</h4>
+        {{ empty_meal_form.as_p|safe }}
+
+        {{ empty_food_formset.management_form|safe }}
+        <h5>Продукти:</h5>
+        <div class="food-items-container">
+            {% for form in empty_food_formset %}
+                <div class="food-item">
+                    <label for="id_foods-__prefix__-product_name">Продукт</label>
+                    <input type="text" class="product-name-input" id="id_foods-__prefix__-product_name" />
+                    <input type="hidden" name="foods-__prefix__-product" class="product-id-input" id="id_foods-__prefix__-product" />
+
+                    {{ form.quantity.label_tag }} {{ form.quantity }}
+
+                    {{ form.DELETE }}
+
+                    <button type="button" class="remove-food-btn">✖</button>
+                </div>
+            {% endfor %}
+        </div>
+        <button type="button" class="add-food-btn" data-meal-index="__prefix__">➕ Добави още продукт</button>
+    </div>
+</div>
+
+<!-- шаблон за нов продукт -->
+<div id="food-item-template" style="display:none;">
+    <div class="food-item">
+        <label for="__prefix__-product_name">Продукт</label>
+        <input type="text" class="product-name-input" id="__prefix__-product_name" />
+        <input type="hidden" name="" class="product-id-input" id="__prefix__-product" />
+
+        <label for="__prefix__-quantity">Количество</label>
+        <input type="number" name="" id="__prefix__-quantity" min="1" />
+
+        <input type="checkbox" name="" style="display:none;" class="delete-checkbox" />
+
+        <button type="button" class="remove-food-btn">✖</button>
+    </div>
+</div>
+
+<script>
+$(function () {
+    function activateAutocomplete() {
+        $(".product-name-input").autocomplete({
+            source: function(request, response) {
+                $.ajax({
+                    url: "{% url 'autocomplete products' %}",
+                    dataType: "json",
+                    data: { term: request.term },
+                    success: function(data) {
+                        response(data.map(item => ({
+                            label: item.name,
+                            value: item.name,
+                            id: item.id
+                        })));
+                    }
+                });
+            },
+            minLength: 1,
+            delay: 300,
+            select: function(event, ui) {
+                $(this).val(ui.item.value);
+                $(this).siblings(".product-id-input").val(ui.item.id);
+                return false;
+            },
+            change: function(event, ui) {
+                if (!ui.item) {
+                    $(this).siblings(".product-id-input").val("");
+                }
+            }
+        });
+    }
+
+    activateAutocomplete();
+
+    // Добавяне на ново хранене
+    $("#add-meal-btn").on("click", function () {
+        let mealsContainer = $("#meals-container");
+        let totalMealForms = $("#id_meals-TOTAL_FORMS");
+        let index = parseInt(totalMealForms.val());
+
+        let newMealHtml = $("#meal-template").html()
+            .replace(/__prefix__/g, index)
+            .replace(/__number__/g, index + 1);
+
+        mealsContainer.append(newMealHtml);
+        totalMealForms.val(index + 1);
+
+        activateAutocomplete();
+    });
+
+    // Добавяне на нов продукт към хранене
+    $("#meals-container").on("click", ".add-food-btn", function () {
+        let mealIndex = $(this).data("meal-index");
+        let mealBlock = $(`.meal-block[data-index="${mealIndex}"]`);
+        let totalFoodsInput = mealBlock.find(`#id_foods-${mealIndex}-TOTAL_FORMS`);
+
+        if (!totalFoodsInput.length) return;
+
+        let totalFoods = parseInt(totalFoodsInput.val());
+        let foodContainer = mealBlock.find(".food-items-container");
+
+        let newFoodHtml = $("#food-item-template").html()
+            .replace(/__prefix__/g, `foods-${mealIndex}-${totalFoods}`);
+
+        foodContainer.append(newFoodHtml);
+
+        let newFoodItem = foodContainer.children().last();
+
+        newFoodItem.find(".product-id-input").attr("name", `foods-${mealIndex}-${totalFoods}-product`);
+        newFoodItem.find(".product-id-input").attr("id", `id_foods-${mealIndex}-${totalFoods}-product`);
+
+        newFoodItem.find(".product-name-input").attr("id", `id_foods-${mealIndex}-${totalFoods}-product_name`);
+
+        newFoodItem.find("input[type=number]").attr("name", `foods-${mealIndex}-${totalFoods}-quantity`);
+        newFoodItem.find("input[type=number]").attr("id", `id_foods-${mealIndex}-${totalFoods}-quantity`);
+
+        newFoodItem.find("input.delete-checkbox").attr("name", `foods-${mealIndex}-${totalFoods}-DELETE`);
+
+        totalFoodsInput.val(totalFoods + 1);
+
+        activateAutocomplete();
+    });
+
+    // Премахване на хранене (маркиране за изтриване)
+    $("#meals-container").on("click", ".remove-meal-btn", function () {
+        let mealBlock = $(this).closest(".meal-block");
+        let deleteInput = mealBlock.find('input[type=checkbox][name$="-DELETE"]');
+        if (deleteInput.length) {
+            deleteInput.prop("checked", true);
+            mealBlock.hide();
+        } else {
+            mealBlock.remove();
+            // актуализирай TOTAL_FORMS ако трябва
+            let totalMealForms = $("#id_meals-TOTAL_FORMS");
+            totalMealForms.val(parseInt(totalMealForms.val()) - 1);
+        }
+    });
+
+    // Премахване на продукт (маркиране за изтриване)
+    $("#meals-container").on("click", ".remove-food-btn", function () {
+        let foodItem = $(this).closest(".food-item");
+        let deleteCheckbox = foodItem.find("input.delete-checkbox");
+        if (deleteCheckbox.length) {
+            deleteCheckbox.prop("checked", true);
+            foodItem.hide();
+        } else {
+            foodItem.remove();
+            // актуализирай TOTAL_FORMS ако трябва
+            // (Тук може да сложиш допълнителна логика)
+        }
+    });
+});
+</script>
+
+
+</body>
+</html>

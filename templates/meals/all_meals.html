@@ -1,0 +1,14 @@
+  <h2>Всички хранения</h2>
+  <a href="{% url 'meal add' %}">➕ Добави ново хранене</a>
+  <ul>
+    {% for meal in meals %}
+      <li>
+        {{ meal.meal }} | {{ meal.date }} |
+        <a href="{% url 'meal details' pk=meal.pk %}">Детайли</a> |
+        <a href="{% url 'meal edit' pk=meal.pk %}">Редакция</a> |
+        <a href="{% url 'meal delete' pk=meal.pk %}">Изтриване</a>
+      </li>
+    {% empty %}
+      <li>Няма добавени хранения.</li>
+    {% endfor %}
+  </ul>

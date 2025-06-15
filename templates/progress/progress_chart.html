@@ -1,42 +1,61 @@
-{% load static %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% extends 'base/base.html' %}
+{% block page_content %}
+    {% load static %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<div class="container mt-5">
-    <h3 class="text-center mb-4">Прогрес на {{ client.user.full_name }}</h3>
-    <canvas id="progressChart"></canvas>
-</div>
+    <div class="container mt-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <a href="{% url 'dashboard' client.id client.user.username %}?start_date={{ start_date }}&end_date={{ end_date }}"
+               class="btn btn-outline-secondary btn-lg rounded-pill shadow-lg px-4 fw-bold">
+                <i class="bi bi-arrow-left-circle"></i> Назад
+            </a>
 
-<script>
-    const labels = {{ dates|safe }};
-    const weights = {{ weights|safe }};
-    const bodyFat = {{ body_fat|safe }};
-    const muscleMass = {{ muscle_mass|safe }};
+            <h3 class="text-primary fw-bold text-center flex-grow-1 me-5">Прогрес на {{ client.user.full_name }}</h3>
+        </div>
 
-    const ctx = document.getElementById('progressChart').getContext('2d');
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [
-                {
-                    label: 'Килограми',
-                    data: weights,
-                    borderColor: 'blue',
-                    fill: false
-                },
-                {
-                    label: 'Мазнини (%)',
-                    data: bodyFat,
-                    borderColor: 'red',
-                    fill: false
-                },
-                {
-                    label: 'Мускулна маса',
-                    data: muscleMass,
-                    borderColor: 'green',
-                    fill: false
-                }
-            ]
-        }
-    });
-</script>
+
+        <div class="text-center mb-3">
+            <a href="{% url 'add progress' client.pk %}" class="btn btn-primary">
+                Добави нов прогрес
+            </a>
+        </div>
+
+
+        <canvas id="progressChart"></canvas>
+    </div>
+
+    <script>
+        const labels = {{ dates|safe }};
+        const weights = {{ weights|safe }};
+        const bodyFat = {{ body_fat|safe }};
+        const muscleMass = {{ muscle_mass|safe }};
+
+        const ctx = document.getElementById('progressChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Килограми',
+                        data: weights,
+                        borderColor: 'blue',
+                        fill: false
+                    },
+                    {
+                        label: 'Мазнини (%)',
+                        data: bodyFat,
+                        borderColor: 'red',
+                        fill: false
+                    },
+                    {
+                        label: 'Мускулна маса',
+                        data: muscleMass,
+                        borderColor: 'green',
+                        fill: false
+                    }
+                ]
+            }
+        });
+    </script>
+{% endblock %}

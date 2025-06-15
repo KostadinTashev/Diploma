@@ -1,9 +1,161 @@
-<h1>Редактиране на упражнение: {{ exercise.name }}</h1>
+{% extends 'base/base.html' %}
+{% block page_content %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ exercise.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
 
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Запази</button>
-</form>
 
-<a href="{% url 'exercise details' exercise.pk exercise.name %}">Отказ</a>
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            color: #333;
+        }
+
+        form label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 6px;
+            margin-top: 12px;
+            color: #555;
+        }
+
+        form input[type="text"],
+        form textarea,
+        form select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        form input[type="text"]:focus,
+        form textarea:focus,
+        form select:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        form textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .image-preview {
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 250px;
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-submit {
+            margin-top: 24px;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+
+        .error {
+            color: #d9534f;
+            margin-top: 6px;
+            font-size: 0.9rem;
+        }
+    </style>
+
+    <div class="container">
+        <h1>Редакция на упражнение: {{ exercise.name }}</h1>
+
+        <form method="post" enctype="multipart/form-data" id="exerciseForm" novalidate>
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+
+            <label for="id_name">Име на упражнението</label>
+            {{ form.name.errors }}
+            {{ form.name }}
+
+            <label for="id_category">Категория</label>
+            {{ form.category.errors }}
+            {{ form.category }}
+
+            <label for="id_description">Описание</label>
+            {{ form.description.errors }}
+            {{ form.description }}
+
+            <label for="id_equipment">Оборудване</label>
+            {{ form.equipment.errors }}
+            {{ form.equipment }}
+
+            <label for="id_exercise_picture">Изображение</label>
+            {{ form.exercise_picture.errors }}
+            {{ form.exercise_picture }}
+
+            <div class="image-preview" id="imagePreview">
+                {% if exercise.exercise_picture %}
+                    <img src="{{ exercise.exercise_picture.url }}" alt="{{ exercise.name }}">
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-submit">Запази промени</button>
+        </form>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('id_exercise_picture');
+        const imagePreviewDiv = document.getElementById('imagePreview');
+
+        imageInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    imagePreviewDiv.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                }
+                reader.readAsDataURL(file);
+            } else {
+                imagePreviewDiv.innerHTML = '';
+            }
+        });
+
+        // Клиентска валидация на формата (пример: име не може да е празно)
+        const form = document.getElementById('exerciseForm');
+        const nameInput = document.getElementById('id_name');
+
+        form.addEventListener('submit', function (event) {
+            let valid = true;
+            // Изчистваме стари грешки
+            const oldErrors = document.querySelectorAll('.error');
+            oldErrors.forEach(e => e.remove());
+
+            if (!nameInput.value.trim()) {
+                valid = false;
+                const error = document.createElement('div');
+                error.classList.add('error');
+                error.innerText = 'Името на упражнението е задължително.';
+                nameInput.parentNode.insertBefore(error, nameInput.nextSibling);
+            }
+
+            if (!valid) {
+                event.preventDefault();
+            }
+        });
+    </script>
+{% endblock %}

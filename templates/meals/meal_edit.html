@@ -1,0 +1,9 @@
+<h1>{% if meal %}Редактирай хранене{% else %}Добави хранене{% endif %}</h1>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Запази</button>
+</form>
+
+<a href="{% url 'all meals' %}">Назад към списъка с хранения</a>

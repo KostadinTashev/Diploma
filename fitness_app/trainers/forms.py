@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 
+from fitness_app.accounts.models import FitnessUser
 from fitness_app.trainers.models import Trainer
 
 
@@ -12,5 +13,5 @@ class TrainerForm(forms.ModelForm):
 
 class UserForm(forms.ModelForm):
     class Meta:
-        model = User
-        fields = ['first_name', 'last_name', 'email']
+        model = FitnessUser
+        fields = ['first_name', 'last_name', 'email', 'gender', 'birth_date', 'gender', 'profile_picture']

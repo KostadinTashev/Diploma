@@ -3,53 +3,48 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Вход | FitZone</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background: url('https://images.unsplash.com/photo-1605296867304-46d5465a13f1') center/cover no-repeat;
-      height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .card {
-      max-width: 400px;
-      width: 100%;
-      padding: 2rem;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      border-radius: 1rem;
-      background: white;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Вход | Сила+</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
 </head>
 <body>
-  <div class="card">
-    <h3 class="text-center mb-4">Вход в FitZone</h3>
+<div class="card">
+    <h3 class="text-center mb-4">Вход в Сила+</h3>
     <form method="post">
-      {% csrf_token %}
-      {% if form.errors %}
-        <div class="alert alert-danger">Невалидни данни. Моля, опитайте отново.</div>
-      {% endif %}
-      <div class="mb-3">
-        <label for="username" class="form-label">Потребителско име</label>
-        {{ form.username|form_field_class:"form-control" }}
-      </div>
-      <div class="mb-3">
-        <label for="password" class="form-label">Парола</label>
-        {{ form.password|form_field_class:"form-control" }}
-      </div>
-      <div class="d-grid">
-        <button type="submit" class="btn btn-danger">Вход</button>
-      </div>
+        {% csrf_token %}
+        {% if form.errors %}
+            <div class="alert alert-danger">Грешка при вход! Проверете въведените данни.</div>
+        {% endif %}
+        <div class="mb-3">
+            <label for="username" class="form-label">Потребителско име</label>
+            <input type="text" name="username" id="username" class="form-control"
+                   placeholder="Въведете потребителско име">
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Парола</label>
+            <div class="input-group">
+                <input type="password" name="password" id="password" class="form-control" placeholder="••••••••">
+                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">👁</button>
+            </div>
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="rememberMe">
+            <label class="form-check-label" for="rememberMe">Запомни ме</label>
+        </div>
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-danger">Вход</button>
+        </div>
     </form>
     <p class="mt-3 text-center">
-      Нямате профил? <a href="{% url 'register user' %}">Регистрирайте се</a>
+        Нямате профил? <a href="{% url 'register user' %}">Регистрирайте се</a>
     </p>
-  </div>
+</div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{% static 'js/login.js' %}">
+
+</script>
 </body>
 </html>

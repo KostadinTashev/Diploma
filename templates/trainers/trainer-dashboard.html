@@ -1,53 +1,98 @@
 {% load static %}
 
 {% block content %}
-    <div class="dashboard-container">
-        <h1>Добре дошъл, {{ trainer.user.first_name }}!</h1>
+<div class="trainer-dashboard">
+    <h1 class="dashboard-heading">👋 Здравей, {{ trainer.user.first_name }}!</h1>
+    <p class="dashboard-lead">Управлявай ефективно клиентите, програмите и хранителните режими.</p>
 
-        <div class="dashboard-nav">
-            <ul>
-                <li><a href="{% url 'trainer clients' trainer.id %}">👥 Моите клиенти</a></li>
-                <li><a href="{% url 'workout list' %}">🏋️‍♂️ Тренировки</a></li>
-{#                <li><a href="{% url 'assign program' client.id %}">📋 Програма</a></li>#}
-
-                <li><a href="{% url 'exercises' %}">📋 Упражнения</a></li>
-                <li><a href="{% url 'trainer details' trainer.id trainer.user.username %}">🧑‍💼 Профил</a></li>
-
-            </ul>
-        </div>
-
-        <div class="dashboard-content">
-            <p>Избери секция от менюто отляво, за да управляваш съдържанието.</p>
-        </div>
+    <div class="card-grid">
+        <a href="{% url 'trainer clients' trainer.id %}" class="card-link">
+            <div class="icon-box bg-blue">👥</div>
+            <div class="card-title">Моите клиенти</div>
+        </a>
+        <a href="{% url 'workout list' %}" class="card-link">
+            <div class="icon-box bg-orange">🏋️‍♂️</div>
+            <div class="card-title">Тренировки</div>
+        </a>
+        <a href="{% url 'exercises' %}" class="card-link">
+            <div class="icon-box bg-green">🧘‍♂️</div>
+            <div class="card-title">Упражнения</div>
+        </a>
+        <a href="{% url 'trainer nutrition clients' %}" class="card-link">
+            <div class="icon-box bg-red">🍽️</div>
+            <div class="card-title">Хранителни планове</div>
+        </a>
+        <a href="{% url 'trainer details' trainer.id trainer.user.username %}" class="card-link">
+            <div class="icon-box bg-purple">🧑‍💼</div>
+            <div class="card-title">Профил</div>
+        </a>
     </div>
+</div>
 
-    <style>
-        .dashboard-container {
-            max-width: 800px;
-            margin: auto;
-            padding: 40px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-        }
+<style>
+    .trainer-dashboard {
+        max-width: 1100px;
+        margin: auto;
+        padding: 60px 20px;
+        text-align: center;
+        background-color: #ffffff;
+    }
 
-        .dashboard-nav ul {
-            list-style-type: none;
-            padding: 0;
-        }
+    .dashboard-heading {
+        font-size: 36px;
+        font-weight: bold;
+        color: #222;
+        margin-bottom: 10px;
+    }
 
-        .dashboard-nav ul li {
-            margin: 15px 0;
-        }
+    .dashboard-lead {
+        font-size: 18px;
+        color: #666;
+        margin-bottom: 40px;
+    }
 
-        .dashboard-nav ul li a {
-            text-decoration: none;
-            font-size: 18px;
-            color: #333;
-        }
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 30px;
+    }
 
-        .dashboard-nav ul li a:hover {
-            color: #007bff;
-        }
-    </style>
+    .card-link {
+        background: #f5f5f5;
+        border-radius: 14px;
+        padding: 30px 20px;
+        text-decoration: none;
+        color: #222;
+        transition: transform 0.3s, box-shadow 0.3s;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .card-link:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon-box {
+        font-size: 36px;
+        width: 70px;
+        height: 70px;
+        margin: 0 auto 15px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+    }
+
+    .card-title {
+        font-size: 17px;
+        font-weight: 600;
+    }
+
+    .bg-blue { background-color: #007bff; }
+    .bg-orange { background-color: #fd7e14; }
+    .bg-green { background-color: #28a745; }
+    .bg-red { background-color: #dc3545; }
+    .bg-purple { background-color: #6f42c1; }
+</style>
 {% endblock %}

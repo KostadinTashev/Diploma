@@ -1,0 +1,128 @@
+{% extends 'base/base.html' %}
+{% block page_content %}
+    <div class="plan-details-container">
+        <h2 class="text-center text-primary fw-bold"><i class="bi bi-nutrition"></i> {{ plan.name }}</h2>
+        <p class="client-name"><strong>👤 Клиент:</strong> {{ plan.client.user.full_name }}</p>
+        <p class="plan-description">{{ plan.description }}</p>
+
+        <h3><i class="bi bi-bar-chart-line-fill"></i> Цели макронутриенти:</h3>
+        <ul class="macro-list">
+            <li>🍽️ Калории: <strong>{{ plan.calories }}</strong></li>
+            <li>🍞 Въглехидрати: <strong>{{ plan.carbohydrate }}g</strong></li>
+            <li>🥑 Мазнини: <strong>{{ plan.fats }}g</strong></li>
+            <li>🍖 Протеини: <strong>{{ plan.proteins }}g</strong></li>
+        </ul>
+
+        <h3><i class="bi bi-calendar-week"></i> Хранения по дни:</h3>
+        {% for day, meals in meals_by_day.items %}
+            <div class="day-block">
+                <h4 class="day-title" onclick="toggleDay('{{ day }}')">
+                    <i class="bi bi-caret-right-fill"></i> {{ day }}
+                </h4>
+                <div id="{{ day }}" class="day-content" style="display: none;">
+                    {% for meal in meals %}
+                        <div class="meal-item">
+                            <strong>{{ meal.meal }}</strong>
+                            <p>{{ meal.description }}</p>
+
+                            <h5>Храни:</h5>
+                            <ul class="product-list">
+                                {% for product in meal.products %}
+                                    <li>{{ product.product.name }} – {{ product.quantity }}г</li>
+                                {% empty %}
+                                    <li class="text-muted">Няма добавени продукти.</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+        <div class="action-buttons text-center mt-4">
+            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="history.back()">
+                <i class="bi bi-arrow-left-circle"></i> Назад
+            </button>
+            <a href="{% url 'plan edit' plan.pk %}" class="btn btn-outline-primary btn-lg">
+                <i class="bi bi-pencil-square"></i> Редактирай
+            </a>
+            <a href="{% url 'plan delete' plan.pk %}" class="btn btn-outline-danger btn-lg">
+                <i class="bi bi-trash"></i> Изтрий
+            </a>
+        </div>
+    </div>
+
+    <style>
+        .plan-details-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: translateY(-15px);
+            animation: fadeIn 0.5s ease-in-out forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .day-block {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            transition: 0.3s ease-in-out;
+            cursor: pointer;
+        }
+
+        .day-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #007bff;
+            padding: 10px;
+            transition: 0.3s ease-in-out;
+        }
+
+        .day-title:hover {
+            color: #0056b3;
+        }
+
+        .day-content {
+            padding: 10px;
+            border-top: 2px solid #007bff;
+            display: none;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            transition: 0.3s ease-in-out;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+    </style>
+
+    <script>
+        function toggleDay(dayId) {
+            const dayContent = document.getElementById(dayId);
+            const icon = document.querySelector(`[onclick="toggleDay('${dayId}')"] i`);
+
+            if (dayContent.style.display === "none") {
+                dayContent.style.display = "block";
+                icon.classList.replace("bi-caret-right-fill", "bi-caret-down-fill");
+            } else {
+                dayContent.style.display = "none";
+                icon.classList.replace("bi-caret-down-fill", "bi-caret-right-fill");
+            }
+        }
+    </script>
+{% endblock %}

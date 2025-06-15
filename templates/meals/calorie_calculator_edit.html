@@ -1,0 +1,154 @@
+{% extends 'base/base.html' %}
+{% load form_tags %}
+{% load static %}
+
+{% block page_content %}
+    <style>
+        .autocomplete-suggestions {
+            border: 1px solid #ddd;
+            max-height: 150px;
+            overflow-y: auto;
+            background: white;
+            position: absolute;
+            z-index: 1000;
+            width: 100%;
+        }
+
+        .autocomplete-suggestion {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .autocomplete-suggestion:hover {
+            background-color: #f0f0f0;
+        }
+
+        .card-custom {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #food-items input[type="checkbox"][name$="-DELETE"] {
+            display: none;
+        }
+    </style>
+
+    <div class="container mt-5">
+        <div class="card card-custom">
+            <div class="card-body p-5">
+                <h2 class="mb-4 text-center text-primary fw-bold">
+                    <i class="bi bi-pencil-square"></i> Редактиране на хранене
+                </h2>
+                <form method="post" id="meal-form" action="{% url 'edit meal client' meal_id %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ meal_form.date.label_tag }}
+                        {{ meal_form.date|add_class:"form-control rounded-pill shadow-sm" }}
+                    </div>
+                    <div class="mb-3">
+                        {{ meal_form.meal.label_tag }}
+                        {{ meal_form.meal|add_class:"form-select rounded-pill shadow-sm" }}
+                    </div>
+
+                    <h4 class="mt-4 text-secondary fw-bold">Продукти</h4>
+                    {{ formset.management_form }}
+                    <div id="food-items">
+                        {% for form in formset %}
+                            <div class="row mb-3 align-items-end food-item">
+                                <div class="col-md-6 position-relative">
+                                    {{ form.product_name.label_tag }}
+                                    {{ form.product_name|add_class:"form-control product-autocomplete rounded shadow-sm" }}
+                                    <div class="autocomplete-suggestions" style="display:none;"></div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">{{ form.quantity.label }}</label>
+                                    {{ form.quantity|add_class:"form-control rounded shadow-sm" }}
+                                </div>
+                                <div class="col-md-2">
+                                    {{ form.DELETE }}
+                                    <button type="button"
+                                            class="btn btn-outline-danger btn-sm rounded-pill shadow-sm remove-item mt-4">
+                                        <i class="bi bi-trash"></i> Премахни
+                                    </button>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{% url 'calorie calculator' %}"
+                           class="btn btn-outline-secondary rounded-pill shadow-sm px-4">
+                            <i class="bi bi-arrow-left-circle"></i> Отказ
+                        </a>
+                        <button type="submit" class="btn btn-success rounded-pill shadow-sm px-4">
+                            <i class="bi bi-save"></i> Запази промените
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        function setupAutocomplete($input) {
+            const $suggestions = $input.closest('.position-relative').find('.autocomplete-suggestions');
+
+            $input.on('input', function () {
+                const query = $(this).val();
+                if (query.length < 2) {
+                    $suggestions.empty().hide();
+                    return;
+                }
+
+                $.ajax({
+                    url: "{% url 'autocomplete products' %}",
+                    data: {term: query},
+                    success: function (data) {
+                        $suggestions.empty();
+                        if (!data.length) {
+                            $suggestions.hide();
+                            return;
+                        }
+
+                        data.forEach(function (item) {
+                            const name = item.name;
+                            const $div = $('<div class="autocomplete-suggestion"></div>').text(name);
+                            $div.on('click', function () {
+                                $input.val(name);
+                                $suggestions.empty().hide();
+                            });
+                            $suggestions.append($div);
+                        });
+
+                        $suggestions.show();
+                    }
+                });
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.food-item').length) {
+                    $suggestions.empty().hide();
+                }
+            });
+        }
+
+        $(document).ready(function () {
+            $('.product-autocomplete').each(function () {
+                setupAutocomplete($(this));
+            });
+        });
+        $(document).on('click', '.remove-item', function () {
+            const $row = $(this).closest('.food-item');
+            $row.find('input[type=checkbox][name$="-DELETE"]').prop('checked', true);
+            $row.hide();
+        });
+
+    </script>
+{% endblock %}

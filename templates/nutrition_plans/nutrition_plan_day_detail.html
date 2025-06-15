@@ -1,0 +1,17 @@
+<h2>Хранителен режим за {{ day }} - {{ plan.name }}</h2>
+
+<a href="{% url 'nutrition_plan_details' plan.id %}">« Назад към цял план</a>
+
+{% for meal in meals %}
+    <div style="margin-top: 20px;">
+        <h4>{{ meal.meal }}</h4>
+        <p>{{ meal.description }}</p>
+        <ul>
+            {% for item in meal.food_items.all %}
+                <li>{{ item.product.name }} - {{ item.quantity }} г</li>
+            {% endfor %}
+        </ul>
+    </div>
+{% empty %}
+    <p>Няма хранения за този ден.</p>
+{% endfor %}

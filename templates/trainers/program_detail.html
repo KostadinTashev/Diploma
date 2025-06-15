@@ -1,0 +1,22 @@
+<h2>Програма за {{ client.user.get_full_name }} на {{ date|date:"d F Y" }}</h2>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Упражнение</th>
+            <th>Серии</th>
+            <th>Повторения</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for item in program_exercises %}
+        <tr>
+            <td>{{ item.exercise.name }}</td>
+            <td>{{ item.series }}</td>
+            <td>{{ item.repetitions }}</td>
+        </tr>
+    {% empty %}
+        <tr><td colspan="3">Няма упражнения за тази дата.</td></tr>
+    {% endfor %}
+    </tbody>
+</table>

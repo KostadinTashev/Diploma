@@ -1,0 +1,23 @@
+<h2>Програми за {{ client.user.get_full_name }} на дата {{ date|date:"d F Y" }}</h2>
+
+{% if programs_with_exercises %}
+    {% for item in programs_with_exercises %}
+        <h3>{{ item.program.workout.program_name }} (Категория: {{ item.program.workout.category }})</h3>
+        <p>{{ item.program.workout.description }}</p>
+
+        <ul>
+            {% for exercise in item.exercises %}
+                <li>
+                    {{ exercise.exercise.name }} - серии: {{ exercise.series }}, повторения: {{ exercise.repetitions }}
+                    {% if exercise.exercise.id in item.completed_exercise_ids %}
+                        <strong>(завършено)</strong>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
+{% else %}
+    <p>Няма налични програми за тази дата.</p>
+{% endif %}
+
+<p><a href="{% url 'programs_dates_list' client.id %}">← Обратно към избор на дата</a></p>

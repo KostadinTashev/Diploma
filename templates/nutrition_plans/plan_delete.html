@@ -1,0 +1,38 @@
+<div class="plan-delete-container">
+    <h2>Изтриване на хранителен режим</h2>
+    <p>Сигурни ли сте, че искате да изтриете "{{ plan.name }}"?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn-delete">Изтрий</button>
+        <a href="{% url 'plan details' plan.pk %}" class="btn-cancel">Отказ</a>
+    </form>
+</div>
+
+<style>
+.plan-delete-container {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 30px;
+    background: #fff3f3;
+    border: 1px solid #f5c2c7;
+    border-radius: 10px;
+    text-align: center;
+}
+.btn-delete, .btn-cancel {
+    margin-top: 20px;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+}
+.btn-delete {
+    background-color: #dc3545;
+    color: white;
+}
+.btn-cancel {
+    background-color: #ccc;
+    color: #333;
+    margin-left: 10px;
+}
+</style>

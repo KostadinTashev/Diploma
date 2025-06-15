@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterUserView, LoginUserView, logout_user, profile
+from .views import RegisterUserView, LoginUserView, logout_user, profile, admin_dashboard
 from ..clients.views import set_client_data
 
 urlpatterns = [
@@ -8,5 +8,6 @@ urlpatterns = [
     path('login/', LoginUserView.as_view(), name='login user'),
     path('logout/', logout_user, name='logout user'),
     path('profile/', profile, name='profile'),
+    path('admin-dashboard/', admin_dashboard, name='admin dashboard'),
 
 ]

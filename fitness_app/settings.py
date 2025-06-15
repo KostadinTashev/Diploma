@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+
     # My apps
     'fitness_app.accounts.apps.AccountsConfig',
     'fitness_app.trainers.apps.TrainersConfig',
@@ -114,8 +115,14 @@ if DEBUG:
     AUTH_PASSWORD_VALIDATORS = []
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'k.tashev02@gmail.com'
+EMAIL_HOST_PASSWORD = 'rnfx ofmt afyg hzlr'
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+LANGUAGE_CODE = 'bg'
 
 TIME_ZONE = 'UTC'
 
@@ -129,8 +136,13 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.FitnessUser'
+
+USE_L10N = True

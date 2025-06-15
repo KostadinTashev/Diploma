@@ -2,33 +2,114 @@
 {% load static %}
 
 {% block page_content %}
-<div class="container mt-5">
-    <div class="card shadow-lg p-4 mx-auto" style="max-width: 600px; border-radius: 20px;">
-        <div class="text-center mb-4">
-            <img src="{% if client.user.profile_picture %}{{ client.user.profile_picture.url }}{% else %}{% static 'images/default-icon.jpg' %}{% endif %}"
-                 class="rounded-circle border border-3 border-primary"
-                 alt="Профилна снимка"
-                 width="150"
-                 height="150"
-                 style="object-fit: cover;">
-        </div>
+    <div class="container mt-5">
+        <div class="card shadow-lg p-4 mx-auto bg-white border-0" style="max-width: 600px; border-radius: 20px;">
+            <div class="text-center mb-4">
+                <img src="
 
-        <h3 class="text-center fw-bold">{{ client.user.first_name }} {{ client.user.last_name }}</h3>
-        <p class="text-center text-muted mb-4">{{ client.user.email }}</p>
 
-        <div class="list-group list-group-flush">
-            <div class="list-group-item d-flex justify-content-between">
-                <strong>Пол:</strong> <span>{{ client.user.get_gender_display }}</span>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                        {% if client.user.profile_picture %}{{ client.user.profile_picture.url }}{% else %}{% static 'images/default-icon.jpg' %}{% endif %}"
+                     class="rounded-circle border border-4 border-primary shadow-sm"
+                     alt="Профилна снимка"
+                     width="150"
+                     height="150"
+                     style="object-fit: cover;">
             </div>
-            <div class="list-group-item d-flex justify-content-between">
-                <strong>Дата на раждане:</strong> <span>{{ client.user.birth_date|date:"d.m.Y" }}</span>
-            </div>
-        </div>
 
-        <div class="d-flex justify-content-center gap-3 mt-4">
-            <a href="{% url 'client edit' %}" class="btn btn-outline-primary w-50">Редактирай профил</a>
-            <a href="{% url 'client delete' %}" class="btn btn-outline-danger w-50">Изтрий профила</a>
+            <h2 class="text-center fw-bold text-primary">{{ client.user.first_name }} {{ client.user.last_name }}</h2>
+            <p class="text-center text-muted mb-4 fs-5">{{ client.user.email }}</p>
+
+            <div class="text-center mt-4">
+                <a href="{% url 'progress chart' client.pk %}" class="btn btn-outline-primary">
+                    Виж графика на прогреса
+                </a>
+            </div>
+
+            <div class="list-group list-group-flush bg-light shadow-sm rounded">
+                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                    <strong class="text-secondary">Пол:</strong>
+                    <span class="fw-semibold">{{ client.user.get_gender_display }}</span>
+                </div>
+
+                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                    <strong class="text-secondary">Дата на раждане:</strong>
+                    <span class="fw-semibold">{{ client.user.birth_date|date:"d.m.Y" }}</span>
+                </div>
+
+                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                    <strong class="text-secondary">Цел:</strong>
+                    <span class="fw-semibold">{{ client.get_goals_display }}</span>
+                </div>
+
+                {% if client.height %}
+                    <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                        <strong class="text-secondary">Височина:</strong>
+                        <span class="fw-semibold">{{ client.height }} см</span>
+                    </div>
+                {% endif %}
+
+                {% if client.weight %}
+                    <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                        <strong class="text-secondary">Тегло:</strong>
+                        <span class="fw-semibold">{{ client.weight }} кг</span>
+                    </div>
+
+                {% endif %}
+                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                    <strong class="text-secondary">Гръдна обиколка:</strong>
+                    <span class="fw-semibold">{{ client.chest }} см</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                    <strong class="text-secondary">Врат:</strong>
+                    <span class="fw-semibold">{{ client.neck }} см</span>
+                </div>
+                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                    <strong class="text-secondary">Талия:</strong>
+                    <span class="fw-semibold">{{ client.waist }} см</span>
+                </div>
+
+                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                    <strong class="text-secondary">Ханш:</strong>
+                    <span class="fw-semibold">{{ client.hip }} см</span>
+                </div>
+                {% if latest_progress and latest_progress.body_fat_percentage %}
+                    <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                        <strong class="text-secondary">Подкожни мазнини:</strong>
+                        <span class="fw-semibold">{{ latest_progress.body_fat_percentage|floatformat:2 }} %</span>
+                    </div>
+                {% endif %}
+
+                {% if latest_progress and latest_progress.muscle_mass %}
+                    <div class="list-group-item d-flex justify-content-between bg-transparent">
+                        <strong class="text-secondary">Мускулна маса:</strong>
+                        <span class="fw-semibold">{{ latest_progress.muscle_mass|floatformat:2 }}</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <button type="button" class="btn btn-secondary" onclick="previousStep()">Назад</button>
         </div>
     </div>
-</div>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <script>
+        function previousStep() {
+            window.history.back();
+        }
+    </script>
 {% endblock %}
+

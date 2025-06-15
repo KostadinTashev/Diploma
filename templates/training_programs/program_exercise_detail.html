@@ -1,0 +1,20 @@
+<div class="container">
+    <h2>Тренировка за {{ client.user.first_name }} {{ client.user.last_name }}</h2>
+    <p><strong>Дата:</strong> {{ date }}</p>
+    <p><strong>Програма:</strong> {{ workout.program_name }}</p>
+    <p><strong>Описание:</strong> {{ workout.description }}</p>
+
+    <h4>Упражнения:</h4>
+    <ul>
+        {% for ex in exercises %}
+            <li>
+                {{ ex.exercise.name }}
+                {% if ex.exercise.id in completed_exercises %}
+                    <span class="text-success">✅ Изпълнено</span>
+                {% else %}
+                    <span class="text-danger">❌ Не е изпълнено</span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+</div>

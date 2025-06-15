@@ -1,0 +1,138 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% load dict_extras %}
+{% block page_content %}
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+
+        .meal-header {
+            background: linear-gradient(90deg, #007bff, #0056b3); /* Синя цветова схема */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border-top-left-radius: .5rem;
+            border-top-right-radius: .5rem;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .meal-card {
+            border: none;
+            border-radius: .5rem;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease-in-out;
+            background-color: white;
+        }
+
+        .meal-card:hover {
+            transform: scale(1.05);
+        }
+
+        .meal-summary {
+            background-color: #eef2f7;
+            border-top: 2px solid #007bff;
+            padding: 0.75rem 1.5rem;
+            font-weight: bold;
+            border-bottom-left-radius: .5rem;
+            border-bottom-right-radius: .5rem;
+        }
+
+        .list-group-item {
+            font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s ease-in-out;
+        }
+
+        .list-group-item:hover {
+            background-color: #f1f1f1;
+        }
+
+        .progress {
+            height: 8px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            transition: width 0.6s ease-in-out;
+        }
+    </style>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+    <a class="btn btn-outline-secondary btn-sm rounded-pill shadow-sm px-3"
+       href="{% url 'calorie calculator' %}">
+        <i class="bi bi-arrow-left-circle"></i> Назад
+    </a>
+
+    <h2 class="text-primary fw-bold flex-grow-1 text-center">
+        <i class="bi bi-calendar-week"></i> История на храненията
+    </h2>
+</div>
+
+
+    <form method="get" class="row g-3 mb-4 align-items-end justify-content-center">
+        <div class="col-md-auto">
+            <label for="date" class="form-label fw-bold">Избери дата:</label>
+            <input type="date" id="date" name="date" class="form-control shadow-sm" value="{{ selected_date }}">
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-primary shadow-lg px-4">
+                <i class="bi bi-search"></i> Покажи
+            </button>
+        </div>
+    </form>
+
+    {% if grouped_meals %}
+        {% for key, meals in grouped_meals.items %}
+            {% with totals=grouped_totals|get_item:key %}
+                <div class="card meal-card">
+                    <div class="meal-header">
+                        <i class="bi bi-egg-fill"></i> {{ meals.0.get_meal_display }} — {{ meals.0.date|date:"d.m.Y" }}
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for meal in meals %}
+                            {% for item in meal.food_items.all %}
+                                <li class="list-group-item">
+                                    <div>
+                                        <i class="bi bi-nut-fill"></i> {{ item.product.name }} —
+                                        <strong>{{ item.quantity }}g</strong>
+                                    </div>
+                                    <div class="text-end">
+                                        🔥 {{ item.get_calories }} ккал |
+                                        🍞 {{ item.get_carbohydrates }}г |
+                                        🥑 {{ item.get_fats }}г |
+                                        🍗 {{ item.get_proteins }}г
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                    <div class="meal-summary">
+                        Общо: 🔥 {{ totals.calories }} ккал |
+                        🍞 {{ totals.carbs }}г |
+                        🥑 {{ totals.fats }}г |
+                        🍗 {{ totals.proteins }}г
+
+                        <div class="mt-3">
+                            <div class="progress">
+                                <div class="progress-bar bg-primary" style="width: {{ totals.carbs }}%"></div>
+                                <div class="progress-bar bg-info" style="width: {{ totals.fats }}%"></div>
+                                <div class="progress-bar bg-success" style="width: {{ totals.proteins }}%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endwith %}
+        {% endfor %}
+    {% else %}
+        <div class="alert alert-warning shadow-lg text-center">
+            <i class="bi bi-exclamation-circle"></i> Няма налични хранения за избраната дата.
+        </div>
+    {% endif %}
+{% endblock %}
