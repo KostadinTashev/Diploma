@@ -1,0 +1,18 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2>Създаване на нов клиент</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h5 class="fw-bold">Данни за потребителя:</h5>
+        {{ user_form.as_p }}
+
+        <h5 class="fw-bold">Данни за клиента:</h5>
+        {{ client_form.as_p }}
+
+        <button type="submit" class="btn btn-success">Създай</button>
+        <a href="{% url 'admin clients list' %}" class="btn btn-secondary">Назад</a>
+    </form>
+</div>
+{% endblock %}

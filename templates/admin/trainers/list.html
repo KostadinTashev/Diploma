@@ -1,0 +1,37 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="text-primary">Списък с треньори</h1>
+        <a href="{% url 'admin trainer create' %}" class="btn btn-success">
+            <i class="bi bi-plus-circle"></i> Нов треньор
+        </a>
+    </div>
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Име</th>
+                <th>Потребител</th>
+                <th>Специалност</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for trainer in trainers %}
+            <tr>
+                <td>{{ trainer.id }}</td>
+                <td>{{ trainer.user.full_name }}</td>
+                <td>{{ trainer.user.username }}</td>
+                <td>{{ trainer.get_speciality_display }}</td>
+                <td>
+                    <a href="{% url 'admin trainer details' trainer.id %}" class="btn btn-sm btn-primary">Детайли</a>
+                    <a href="{% url 'admin trainer edit' trainer.id %}" class="btn btn-sm btn-warning">Редактирай</a>
+                    <a href="{% url 'admin trainer delete' trainer.id %}" class="btn btn-sm btn-danger">Изтрий</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

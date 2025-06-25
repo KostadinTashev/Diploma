@@ -12,12 +12,17 @@ User = get_user_model()
 
 
 class ExerciseCategory(str, ChoicesStringsMixin, Enum):
-    Бицепс = "Бицепс"
-    Трицепс = "Трицепс"
     Гърди = "Гърди"
     Гръб = "Гръб"
-    Корем = "Корем"
     Рамо = "Рамо"
+    Трицепс = "Трицепс"
+    Крака = "Крака"
+    Корем = "Корем"
+    Кардио = "Кардио"
+    Функционални = "Функционални"
+    Упражнения = "Упражнения"
+    Йога = "Йога"
+    Пилатес = "Пилатес"
 
 
 class Exercise(models.Model):
@@ -68,15 +73,13 @@ class Exercise(models.Model):
 
 class CompletedExercise(models.Model):
     client = models.ForeignKey('clients.Client', on_delete=models.CASCADE, verbose_name='Клиент')
-    exercise = models.ForeignKey('exercises.Exercise', on_delete=models.CASCADE, verbose_name='Упражнение')
-    workout = models.ForeignKey('workouts.Workout', on_delete=models.CASCADE, verbose_name='Тренировка', null=True,
-                                blank=True)
+    workout_exercise = models.ForeignKey('workouts.WorkoutExercise', on_delete=models.CASCADE, verbose_name='Упражнение')
     date = models.DateField(default=timezone.now, verbose_name='Дата за изпълнение')
 
     class Meta:
         verbose_name = 'Изпълнено упражнение'
         verbose_name_plural = 'Изпълнени упражнения'
-        unique_together = ('client', 'exercise', 'workout', 'date')
+        unique_together = ('client', 'workout_exercise', 'date')
 
     def __str__(self):
-        return f"{self.client} - {self.exercise} ({self.workout})"
+        return f"{self.client} - {self.workout_exercise} ({self.date})"

@@ -1,82 +1,80 @@
 {% extends "base/base.html" %}
 {% load forms %}
 {% block page_content %}
-    <div class="container-fluid mt-5">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <a href="{% url 'current progress' client.id %}?start_date={{ start_date }}&end_date={{ end_date }}"
-               class="btn btn-outline-secondary btn-lg rounded-pill shadow-lg px-4 fw-bold">
-                <i class="bi bi-arrow-left-circle"></i> Назад
-            </a>
+<div class="container-fluid mt-5">
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <a href="{% url 'current progress' client.id %}?start_date={{ start_date }}&end_date={{ end_date }}"
+           class="btn btn-outline-secondary btn-lg rounded-pill shadow-lg px-4 fw-bold">
+            <i class="bi bi-arrow-left-circle"></i> Назад
+        </a>
 
-            <h2 class="text-primary fw-bold text-center flex-md-grow-1 me-5">Вашите телесни измервания и прогрес</h2>
-        </div>
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} shadow-sm">{{ message }}</div>
-            {% endfor %}
-        {% endif %}
+        <h2 class="text-primary fw-bold text-center flex-md-grow-1 me-5">Вашите телесни измервания и прогрес</h2>
+    </div>
 
-        <div class="card bg-light shadow-lg p-4 rounded">
-            <h4 class="text-center mb-3 text-secondary fw-semibold">Филтър по дата</h4>
-            <form method="GET" class="mb-3">
-                <div class="row g-3">
-                    <div class="col-md-5">
-                        <label for="start_date" class="form-label">Начална дата</label>
-                        <input type="date" id="start_date" name="start_date" class="form-control rounded-pill shadow-sm"
-                               value="{{ start_date }}">
-                    </div>
-                    <div class="col-md-5">
-                        <label for="end_date" class="form-label">Крайна дата</label>
-                        <input type="date" id="end_date" name="end_date" class="form-control rounded-pill shadow-sm"
-                               value="{{ end_date }}">
-                    </div>
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill shadow"><i
-                                class="bi bi-search"></i> Филтрирай
-                        </button>
-                    </div>
+
+
+    <div class="card bg-light shadow-lg p-4 rounded">
+        <h4 class="text-center mb-3 text-secondary fw-semibold">Филтър по дата</h4>
+        <form method="GET" class="mb-3">
+            <div class="row g-3">
+                <div class="col-md-5">
+                    <label for="start_date" class="form-label">Начална дата</label>
+                    <input type="date" id="start_date" name="start_date" class="form-control rounded-pill shadow-sm"
+                           value="{{ start_date }}">
                 </div>
-            </form>
-        </div>
+                <div class="col-md-5">
+                    <label for="end_date" class="form-label">Крайна дата</label>
+                    <input type="date" id="end_date" name="end_date" class="form-control rounded-pill shadow-sm"
+                           value="{{ end_date }}">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100 rounded-pill shadow">
+                        <i class="bi bi-search"></i> Филтрирай
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
 
-        <div class="card p-4 mt-4 shadow-lg rounded">
-            <h4 class="text-center mb-3 text-secondary fw-semibold">История на измерванията</h4>
-            <table class="table table-hover table-bordered text-center shadow-sm rounded">
-                <thead class="table-dark">
-                <tr>
-                    <th>Дата</th>
-                    <th>Тегло (кг)</th>
-                    <th>Височина (см)</th>
-                    <th>Обиколка на врата</th>
-                    <th>Гръдна обиколка</th>
-                    <th>Талия</th>
-                    <th>Ханш</th>
-                    <th>Мускулна маса</th>
-                    <th>% Мазнини</th>
+    <div class="card p-4 mt-4 shadow-lg rounded">
+        <h4 class="text-center mb-3 text-secondary fw-semibold">История на измерванията</h4>
+        <table class="table table-hover table-bordered text-center shadow-sm rounded">
+            <thead class="table-dark">
+            <tr>
+                <th>Дата</th>
+                <th>Тегло (кг)</th>
+                <th>Височина (см)</th>
+                <th>Обиколка на врата</th>
+                <th>Гръдна обиколка</th>
+                <th>Талия</th>
+                <th>Ханш</th>
+                <th>Мускулна маса</th>
+                <th>% Мазнини</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for progress in progress_entries %}
+                <tr class="bg-light">
+                    <td>{{ progress.progress_date }}</td>
+                    <td>{{ progress.weight }} кг</td>
+                    <td>{{ progress.height }} см</td>
+                    <td>{{ progress.neck }} см</td>
+                    <td>{{ progress.chest }} см</td>
+                    <td>{{ progress.waist }} см</td>
+                    <td>{{ progress.hip }} см</td>
+                    <td>{{ progress.muscle_mass|floatformat:2 }}</td>
+                    <td>{{ progress.body_fat_percentage|floatformat:2 }}</td>
                 </tr>
-                </thead>
-                <tbody>
-                {% for progress in progress_entries %}
-                    <tr class="bg-light">
-                        <td>{{ progress.progress_date }}</td>
-                        <td>{{ progress.weight }} кг</td>
-                        <td>{{ progress.height }} см</td>
-                        <td>{{ progress.neck }} см</td>
-                        <td>{{ progress.chest }} см</td>
-                        <td>{{ progress.waist }} см</td>
-                        <td>{{ progress.hip }} см</td>
-                        <td>{{ progress.muscle_mass|floatformat:2 }}</td>
-                        <td>{{ progress.body_fat_percentage|floatformat:2 }}</td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="9" class="text-muted">Все още няма измервания.</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
+            {% empty %}
+                <tr>
+                    <td colspan="9" class="text-muted">Все още няма измервания.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
+    {% if is_client_user %}
         <div class="card p-5 mt-4 shadow-lg rounded border-primary">
             <h4 class="text-center mb-4 text-primary fw-bold text-uppercase">Добавете нов прогрес</h4>
 
@@ -95,8 +93,7 @@
                         </label>
                         <select name="goals" id="goals" class="form-select rounded shadow-sm bg-light border-0">
                             {% for key, value in goals_choices %}
-                                <option value="{{ key }}"
-                                        {% if client.goals == key %}selected{% endif %}>{{ value }}</option>
+                                <option value="{{ key }}" {% if client.goals == key %}selected{% endif %}>{{ value }}</option>
                             {% endfor %}
                         </select>
                     </div>
@@ -162,5 +159,6 @@
                 </div>
             </form>
         </div>
-    </div>
+    {% endif %}
+</div>
 {% endblock %}

@@ -1,5 +1,6 @@
 from datetime import datetime, date
 from django.utils import timezone
+from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 from fitness_app.exercises.models import CompletedExercise
 from fitness_app.program_exercises.forms import ProgramExerciseFormEditSet
@@ -18,17 +19,10 @@ def assign_program_view(request, client_id):
     trainer = client.trainer
 
     if request.method == 'POST':
-        future_workouts = ProgramExercise.objects.filter(
-            client=client,
-            date__gte=now().date()
-        ).order_by('date')
-        formset = ProgramExerciseFormSet(request.POST, instance=client, queryset=future_workouts)
-
+        formset = ProgramExerciseFormSet(request.POST, instance=client)
         if formset.is_valid():
             formset.save()
             return redirect('trainer clients', trainer_id=trainer.pk)
-        else:
-            print("Formset errors:", formset.errors)
     else:
         formset = ProgramExerciseFormSet(instance=client)
 
@@ -70,6 +64,7 @@ def edit_program(request, client_id):
         'client': client,
         'formset': formset
     })
+
 
 def programs_dates_list(request, client_id):
     client = get_object_or_404(Client, pk=client_id)
@@ -115,24 +110,36 @@ def programs_for_date(request, client_id, date):
 def client_program_view(request, client_id):
     client = get_object_or_404(Client, pk=client_id)
 
+    # Избиране на дата от заявката или днешна по подразбиране
     selected_date_str = request.GET.get('date')
-    if selected_date_str:
-        try:
-            selected_date = datetime.strptime(selected_date_str, '%Y-%m-%d').date()
-        except ValueError:
-            selected_date = date.today()
-    else:
-        selected_date = date.today()
+    selected_date = parse_date(selected_date_str) if selected_date_str else timezone.localdate()
 
-    workouts = ProgramExercise.objects.filter(client=client, date=selected_date).order_by('date')
+    # Взимаме програмите на клиента за конкретната дата
+    program_entries = ProgramExercise.objects.filter(
+        client=client,
+        date=selected_date
+    ).select_related('workout')
 
-    completed_exercises = CompletedExercise.objects.filter(
-        client=client
-    ).values_list('exercise_id', flat=True)
+    # Взимаме всички тренировки от тези програми
+    workouts = [entry.workout for entry in program_entries]
 
-    return render(request, 'program_exercises/client_program.html', {
+    # Взимаме всички упражнения (WorkoutExercise), свързани с тези тренировки
+    exercises = WorkoutExercise.objects.filter(workout__in=workouts).select_related('exercise')
+
+    # Взимаме изпълнените упражнения за тази дата и клиент
+    completed_exercise_ids = CompletedExercise.objects.filter(
+        client=client,
+        workout_exercise__in=exercises,
+        date=selected_date
+    ).values_list('workout_exercise_id', flat=True)
+
+    context = {
         'client': client,
-        'workouts': workouts,
-        'completed_exercises': completed_exercises,
+        'workouts': program_entries,
+        'exercises': exercises,
+        'completed_exercise_ids': list(completed_exercise_ids),
         'selected_date': selected_date,
-    })
+        'trainer_id': client.trainer.id if client.trainer else None,
+    }
+
+    return render(request, 'program_exercises/client_program.html', context)

@@ -2,87 +2,47 @@
 {% load static %}
 
 {% block page_content %}
-<div class="container py-5">
-    <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-5">
+<div class="container py-4">
+    <h2 class="text-center">{{ workout.program_name }}</h2>
+    <p class="text-muted text-center">{{ workout.category }}</p>
+    <p class="text-center">{{ workout.description|default:"Няма описание." }}</p>
 
-            {% if message %}
-                <div class="alert alert-warning shadow-sm rounded-3 text-center" role="alert">
-                    {{ message }}
-                </div>
-            {% else %}
-
-                <div class="d-flex align-items-center justify-content-between mb-4">
-                    <a href="{% url 'dashboard' client.id client.user.username %}"
-                       class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm">
-                        <i class="bi bi-arrow-left-circle"></i> Назад
-                    </a>
-                    <h2 class="text-primary fw-bold flex-grow-1 text-center">{{ workout.program_name }}</h2>
-                </div>
-
-                <p class="fs-5"><strong>Категория:</strong>
-                    <span class="badge bg-secondary">{{ workout.category }}</span></p>
-                <p class="fs-5"><strong>Описание:</strong> {{ workout.description|default:"Няма описание" }}</p>
-
-                <h4 class="mt-4 text-center text-secondary fw-bold">
-                    <i class="bi bi-list-check"></i> Упражнения
-                </h4>
-
-                <table class="table table-striped table-hover shadow-sm rounded-3">
-                    <thead class="table-dark text-center">
-                    <tr>
-                        <th>Упражнение</th>
-                        <th>Серии</th>
-                        <th>Повторения</th>
-                        <th>Почивка (сек)</th>
-                        <th>Статус</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for ex in exercises %}
-                        <tr id="exercise-row-{{ ex.exercise.pk }}">
-                            <td>
-                                <a href="{% url 'exercise details' ex.exercise.pk ex.exercise.name %}?date={{ selected_date|date:'Y-m-d' }}"
-                                   class="text-decoration-none text-primary fw-semibold hover-link">
-                                    {{ ex.exercise.name }}
-                                </a>
-                            </td>
-                            <td class="text-center">{{ ex.series }}</td>
-                            <td class="text-center">{{ ex.repetitions }}</td>
-                            <td class="text-center">{{ ex.rest_time|default:"-" }}</td>
-                            <td class="text-center">
-                                {% if has_client %}
-                                    {% if ex.exercise.id in completed_exercises %}
-                                        <button class="btn btn-success toggle-complete rounded-pill shadow-sm"
-                                                data-exercise-id="{{ ex.exercise.pk }}"
-                                                data-completed="true"
-                                                data-date="{{ selected_date|date:'Y-m-d' }}">
-                                            <i class="bi bi-check-circle"></i> Изпълнено
-                                        </button>
-                                    {% else %}
-                                        <button class="btn btn-danger toggle-complete rounded-pill shadow-sm"
-                                                data-exercise-id="{{ ex.exercise.pk }}"
-                                                data-completed="false"
-                                                data-date="{{ selected_date|date:'Y-m-d' }}">
-                                            <i class="bi bi-x-circle"></i> Неизпълнено
-                                        </button>
-                                    {% endif %}
-                                {% else %}
-                                    {% if ex.exercise.id in completed_exercises %}
-                                        <span class="badge bg-success">Изпълнено</span>
-                                    {% else %}
-                                        <span class="badge bg-danger">Неизпълнено</span>
-                                    {% endif %}
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            {% endif %}
-
-        </div>
-    </div>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Упражнение</th>
+                <th>Серии</th>
+                <th>Повторения</th>
+                <th>Почивка</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ex in exercises %}
+            <tr>
+                <td>{{ ex.exercise.name }}</td>
+                <td>{{ ex.series }}</td>
+                <td>{{ ex.repetitions }}</td>
+                <td>{{ ex.rest_time|default:"-" }}</td>
+                <td>
+                    {% if has_client %}
+                        {% if ex.id in completed_exercises %}
+                            <button class="btn btn-success toggle-complete" data-exercise-id="{{ ex.id }}" data-completed="true" data-date="{{ selected_date }}">
+                                <i class="bi bi-check-circle"></i> Изпълнено
+                            </button>
+                        {% else %}
+                            <button class="btn btn-danger toggle-complete" data-exercise-id="{{ ex.id }}" data-completed="false" data-date="{{ selected_date }}">
+                                <i class="bi bi-x-circle"></i> Неизпълнено
+                            </button>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-secondary">Само клиент може да маркира</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 </div>
 
 {% if has_client %}
@@ -94,7 +54,6 @@
             const exerciseId = btn.data('exercise-id');
             const completed = btn.data('completed');
             const date = btn.data('date');
-
             const url = completed
                 ? "{% url 'exercise uncomplete' 0 %}".replace('0', exerciseId)
                 : "{% url 'exercise complete' 0 %}".replace('0', exerciseId);
@@ -122,30 +81,11 @@
                     }
                 },
                 error: function () {
-                    alert('Грешка при заявката, моля опитайте пак.');
+                    alert("Грешка при обработка. Опитайте отново.");
                 }
             });
         });
     });
 </script>
 {% endif %}
-
-<style>
-    .hover-link {
-        transition: color 0.3s ease-in-out;
-    }
-    .hover-link:hover {
-        color: #007bff;
-    }
-    table {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    .btn-success, .btn-danger {
-        transition: transform 0.2s ease-in-out;
-    }
-    .btn-success:hover, .btn-danger:hover {
-        transform: scale(1.05);
-    }
-</style>
 {% endblock %}

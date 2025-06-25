@@ -1,17 +1,20 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Сила+ – персонални тренировки, хранителни планове и прогрес с експертни треньори." />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <meta name="description"
+          content="Сила+ – персонални тренировки, хранителни планове и прогрес с експертни треньори."/>
     <title>Сила+ – Начало</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     <style>
         html {
             scroll-behavior: smooth;
         }
 
-        /* Заглавна секция */
         .hero {
             position: relative;
             background: url('https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?auto=format&fit=crop&w=1470&q=80') center/cover no-repeat;
@@ -23,7 +26,10 @@
         .hero::before {
             content: "";
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.55);
             z-index: 0;
         }
@@ -33,7 +39,6 @@
             z-index: 1;
         }
 
-        /* Ефекти при посочване */
         .card {
             transition: transform 0.3s ease-in-out;
         }
@@ -42,7 +47,6 @@
             transform: scale(1.05);
         }
 
-        /* Футър */
         footer {
             background-color: #212529;
             color: white;
@@ -50,11 +54,46 @@
             text-align: center;
         }
 
-        /* Навигация */
         .nav-link[aria-current="page"] {
             font-weight: 600;
             text-decoration: underline;
         }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            filter: invert(1);
+        }
+
+        .trainer-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            transition: transform 0.3s ease-in-out;
+            filter: blur(2px);
+            transform: scale(1);
+        }
+
+        .trainer-card:hover {
+            filter: blur(0);
+            transform: scale(1.03);
+        }
+
+        .trainer-card-wrapper {
+            position: relative;
+            transition: all 0.3s ease-in-out;
+        }
+
+        .trainer-card-wrapper:hover .trainer-overlay {
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .trainer-img {
+            height: 320px;
+            object-fit: cover;
+            width: 100%;
+            display: block;
+        }
+
     </style>
 </head>
 <body>
@@ -73,9 +112,11 @@
                         {% if user.is_superuser %}
                             <a class="nav-link" href="{% url 'admin dashboard' %}" aria-current="page">Табло</a>
                         {% elif user.client %}
-                            <a class="nav-link" href="{% url 'dashboard' user.client.id user.username %}" aria-current="page">Табло</a>
+                            <a class="nav-link" href="{% url 'dashboard' user.client.id user.username %}"
+                               aria-current="page">Табло</a>
                         {% elif user.trainer %}
-                            <a class="nav-link" href="{% url 'trainer dashboard' user.trainer.id user.username %}" aria-current="page">Табло</a>
+                            <a class="nav-link" href="{% url 'trainer dashboard' user.trainer.id user.username %}"
+                               aria-current="page">Табло</a>
                         {% else %}
                             <a class="nav-link" href="{% url 'all trainers' %}" aria-current="page">Табло</a>
                         {% endif %}
@@ -86,9 +127,11 @@
                 <li class="nav-item"><a class="nav-link" href="#contact">Контакт</a></li>
 
                 {% if user.is_authenticated %}
-                    <li class="nav-item"><a class="nav-link btn btn-danger text-white ms-2" href="{% url 'logout user' %}">Изход</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-danger text-white ms-2"
+                                            href="{% url 'logout user' %}">Изход</a></li>
                 {% else %}
-                    <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2" href="{% url 'login user' %}">Вход</a></li>
+                    <li class="nav-item"><a class="nav-link btn btn-primary text-white ms-2"
+                                            href="{% url 'login user' %}">Вход</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -97,103 +140,183 @@
 
 <main>
 
-<section class="hero" role="banner" aria-label="Заглавна секция">
-    <div class="container">
-        <h1 class="fw-bold">Постигни най-добрата си форма</h1>
-        <p>С нашите експертни треньори и персонализирани програми</p>
-        {% if not request.user.is_authenticated %}
-            <a href="{% url 'register user' %}" class="btn btn-warning btn-lg mt-3" aria-label="Регистрирай се">Регистрирай се</a>
-        {% endif %}
-    </div>
-</section>
-
-<section class="py-5" id="services" aria-labelledby="services-heading">
-    <div class="container text-center">
-        <h2 id="services-heading" class="mb-5">Нашите услуги</h2>
-        <div class="row g-4">
-            <article class="col-md-4" role="article">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Персонални тренировки</h3>
-                        <p class="card-text">Програми, изготвени според твоите цели и ниво.</p>
-                    </div>
-                </div>
-            </article>
-            <article class="col-md-4" role="article">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Хранителни планове</h3>
-                        <p class="card-text">Диети, съобразени с тренировките и твоето тяло.</p>
-                    </div>
-                </div>
-            </article>
-            <article class="col-md-4" role="article">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Прогрес и статистики</h3>
-                        <p class="card-text">Следи теглото, мускулната маса и мазнините си лесно.</p>
-                    </div>
-                </div>
-            </article>
+    <section class="hero" role="banner" aria-label="Заглавна секция">
+        <div class="container">
+            <h1 class="fw-bold">Постигни най-добрата си форма</h1>
+            <p>С нашите експертни треньори и персонализирани програми</p>
+            {% if not request.user.is_authenticated %}
+                <a href="{% url 'register user' %}" class="btn btn-warning btn-lg mt-3" aria-label="Регистрирай се">Регистрирай
+                    се</a>
+            {% endif %}
         </div>
-    </div>
-</section>
+    </section>
 
-<section class="py-5 bg-light" id="trainers" aria-labelledby="trainers-heading">
-    <div class="container text-center">
-        <h2 id="trainers-heading" class="fw-bold mb-4">Срещни нашите треньори</h2>
-        <div class="row g-4">
-            {% for trainer in trainers %}
+    <section class="py-5" id="services" aria-labelledby="services-heading">
+        <div class="container text-center">
+            <h2 id="services-heading" class="mb-5">Нашите услуги</h2>
+            <div class="row g-4">
                 <article class="col-md-4" role="article">
-                    <div class="card border-0 shadow-sm">
-                        <img src="{{ trainer.user.profile_picture.url }}" loading="lazy" class="card-img-top rounded-top"
-                             alt="Снимка на треньор {{ trainer.user.get_full_name|default:trainer.user.username }}">
+                    <div class="card h-100 shadow-sm">
                         <div class="card-body">
-                            <h3 class="card-title h5">{{ trainer.user.get_full_name|default:trainer.user.username }}</h3>
-                            <p class="card-text">{{ trainer.speciality }}</p>
-                            <p class="card-text"><strong>Опит:</strong> {{ trainer.years_of_experience }} години</p>
+                            <h3 class="card-title h5">Персонални тренировки</h3>
+                            <p class="card-text">Програми, изготвени според твоите цели и ниво.</p>
                         </div>
                     </div>
                 </article>
-            {% empty %}
-                <p>Няма налични треньори към момента.</p>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<section class="py-5 bg-white" id="reviews" aria-labelledby="reviews-heading">
-    <div class="container text-center">
-        <h2 id="reviews-heading" class="fw-bold mb-4">Какво казват нашите клиенти</h2>
-        <div class="row g-4">
-            {% for review in reviews %}
                 <article class="col-md-4" role="article">
-                    <blockquote class="blockquote">
-                        <p>“{{ review.comment }}”</p>
-                        <footer class="blockquote-footer">{{ review.client.user.get_full_name }} – {{ review.rating }} ⭐</footer>
-                    </blockquote>
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title h5">Хранителни планове</h3>
+                            <p class="card-text">Диети, съобразени с тренировките и твоето тяло.</p>
+                        </div>
+                    </div>
                 </article>
-            {% empty %}
-                <p>Все още няма отзиви.</p>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<section class="py-5 bg-light" id="contact" aria-labelledby="contact-heading">
-    <div class="container">
-        <h2 id="contact-heading" class="text-center fw-bold mb-4">Свържи се с нас</h2>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <form method="post" action="{% url 'index' %}" novalidate>
-                    {% csrf_token %}
-                    {{ form.as_p }}
-                    <button type="submit" class="btn btn-danger" aria-label="Изпрати съобщение">Изпрати</button>
-                </form>
+                <article class="col-md-4" role="article">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h3 class="card-title h5">Прогрес и статистики</h3>
+                            <p class="card-text">Следи теглото, мускулната маса и мазнините си лесно.</p>
+                        </div>
+                    </div>
+                </article>
             </div>
         </div>
-    </div>
-</section>
+    </section>
+
+    <section class="py-5 bg-light" id="trainers" aria-labelledby="trainers-heading">
+        <div class="container text-center">
+            <h2 id="trainers-heading" class="fw-bold mb-5">Срещни нашите треньори</h2>
+
+            {% if trainers %}
+                <div id="trainerCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="6000">
+                    <div class="carousel-inner">
+
+                        {% for trainer in trainers %}
+                            {% if forloop.counter0|divisibleby:3 %}
+                                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <div class="row justify-content-center g-4">
+                            {% endif %}
+
+                        <div class="col-md-4 d-flex">
+                            <a href="{% url 'trainer details' trainer.id trainer.user.username %}"
+                               class="text-decoration-none text-dark w-100">
+                                <div class="card trainer-card shadow-sm h-100 position-relative overflow-hidden">
+                                    {% if trainer.user.profile_picture %}
+                                        <img src="{{ trainer.user.profile_picture.url }}"
+                                             class="card-img-top trainer-img" alt="Снимка на треньор">
+                                    {% else %}
+                                        <img src="{% static 'images/default-icon.jpg' %}"
+                                             class="card-img-top trainer-img" alt="Профилна снимка">
+                                    {% endif %}
+                                    <div class="card-body text-center bg-white">
+                                        <h5 class="card-title text-primary fw-bold mb-2">
+                                            {{ trainer.user.get_full_name|default:trainer.user.username }}
+                                        </h5>
+                                        <p class="card-text mb-1">
+                                            <strong>Специалност:</strong> {{ trainer.get_speciality_display }}</p>
+                                        <p class="card-text"><strong>Опит:</strong> {{ trainer.years_of_experience }}
+                                            години</p>
+                                    </div>
+                                    <div class="card-overlay"></div>
+                                </div>
+                            </a>
+                        </div>
+
+                        {% if forloop.counter|divisibleby:3 or forloop.last %}
+                            </div>
+                            </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+
+                    {% if trainers|length > 3 %}
+                        <button class="carousel-control-prev" type="button" data-bs-target="#trainerCarousel"
+                                data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Предишни</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#trainerCarousel"
+                                data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">Следващи</span>
+                        </button>
+                    {% endif %}
+                </div>
+            {% else %}
+                <p class="text-muted">Все още няма регистрирани треньори.</p>
+            {% endif %}
+        </div>
+    </section>
+
+
+    <section class="py-5 bg-light" id="reviews" aria-labelledby="reviews-heading">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 id="reviews-heading" class="fw-bold text-primary">Какво казват нашите клиенти</h2>
+            </div>
+
+            {% if reviews %}
+                <div id="reviewCarousel" class="carousel slide" data-bs-ride="carousel">
+                    <div class="carousel-inner">
+                        {% for review in reviews %}
+                            <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                <div class="card shadow-sm border-0 mx-auto" style="max-width: 600px;"
+                                     data-aos="fade-up">
+                                    <div class="card-body text-center">
+                                        <img src="{{ review.client.profile_picture.url }}" class="rounded-circle mb-3"
+                                             alt="Client photo" width="70" height="70"
+                                             onerror="this.style.display='none';">
+                                        <blockquote class="blockquote mb-3">
+                                            <p class="fst-italic">“{{ review.comment }}”</p>
+                                        </blockquote>
+                                        <div>
+                                            {% for i in "12345"|make_list %}
+                                                {% if forloop.counter <= review.rating %}
+                                                    <i class="bi bi-star-fill text-warning"></i>
+                                                {% else %}
+                                                    <i class="bi bi-star text-warning"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        <footer class="blockquote-footer mt-2">{{ review.client.user.get_full_name }}</footer>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <button class="carousel-control-prev" type="button" data-bs-target="#reviewCarousel"
+                            data-bs-slide="prev">
+                        <span class="carousel-control-prev-icon"></span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#reviewCarousel"
+                            data-bs-slide="next">
+                        <span class="carousel-control-next-icon"></span>
+                    </button>
+                </div>
+            {% else %}
+                <div class="col-12 text-center">
+                    <p class="text-muted">Все още няма отзиви. Бъди първият, който ще сподели впечатленията си!</p>
+                </div>
+            {% endif %}
+        </div>
+    </section>
+
+
+    <section class="py-5 bg-light" id="contact" aria-labelledby="contact-heading">
+        <div class="container">
+            <h2 id="contact-heading" class="text-center fw-bold mb-4">Свържи се с нас</h2>
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    <form method="post" action="{% url 'index' %}" novalidate>
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-danger" aria-label="Изпрати съобщение">Изпрати</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
 
 </main>
 
@@ -204,5 +327,10 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+<script>
+    AOS.init();
+</script>
 </body>
 </html>

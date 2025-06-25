@@ -8,8 +8,7 @@ from fitness_app.common.forms import ContactForm
 from fitness_app.trainers.models import Trainer
 
 
-
-def index(request):
+def index(request, pk=None, trainer_name=None):
     form = ContactForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
@@ -26,11 +25,10 @@ def index(request):
         )
         email_message.send(fail_silently=False)
 
-        messages.success(request, "Вашето съобщение беше изпратено успешно!")
         return redirect('index')
 
     trainers = Trainer.objects.all()
-    reviews = AppReview.objects.all()
+    reviews = AppReview.objects.filter(is_approved=True).order_by('-created_at', 'rating')[:6]
     context = {
         'form': form,
         'trainers': trainers,

@@ -1,0 +1,12 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2>Изтриване на треньор</h2>
+    <p>Сигурни ли сте, че искате да изтриете треньора <strong>{{ trainer.user.full_name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Изтрий</button>
+        <a href="{% url 'admin trainers list' %}" class="btn btn-secondary">Отказ</a>
+    </form>
+</div>
+{% endblock %}

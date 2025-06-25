@@ -40,9 +40,9 @@
         {% endfor %}
 
         <div class="action-buttons text-center mt-4">
-            <button type="button" class="btn btn-outline-secondary btn-lg" onclick="history.back()">
+            <a href="{% url 'trainer nutrition clients' %}" class="btn btn-outline-secondary btn-lg">
                 <i class="bi bi-arrow-left-circle"></i> Назад
-            </button>
+            </a>
             <a href="{% url 'plan edit' plan.pk %}" class="btn btn-outline-primary btn-lg">
                 <i class="bi bi-pencil-square"></i> Редактирай
             </a>

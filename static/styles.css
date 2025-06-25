@@ -1,10 +1,8 @@
-/* Общ стил */
 body {
     background-color: #f4f6f9;
     font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Стил за картите с треньори */
 .trainer-card {
   display: flex;
   flex-direction: column;

@@ -48,8 +48,6 @@ def create_nutrition_plan(request, client_id):
             if not food_formset.is_valid():
                 valid = False
         if not valid:
-            print("Plan form errors:", plan_form.errors)
-            print("Meal formset errors:", meal_formset.errors)
             for i, ff in enumerate(food_formsets):
                 print(f"Food formset {i} errors:", ff.errors)
         if valid:
@@ -173,7 +171,6 @@ def plan_edit(request, plan_id):
                     print(f"Deleting food item: {deleted}")
                     deleted.delete()
 
-            messages.success(request, "Хранителният режим беше успешно редактиран.")
             return redirect('plan details', pk=plan.id)
         else:
             print("Form validation failed.")

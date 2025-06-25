@@ -1,8 +1,24 @@
 {% extends 'base/base.html' %}
+{% load static %}
 {% block page_content %}
-
     <div class="container py-5">
-        <h1 class="mb-5 text-center fw-bold display-6 text-primary-emphasis">
+
+        <div class="d-flex justify-content-start mb-4">
+            <a href="{% url 'trainer dashboard' request.user.trainer.id request.user.username %}"
+               class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm px-4 fw-bold">
+                <i class="bi bi-arrow-left-circle"></i> Назад към таблото
+            </a>
+        </div>
+
+        <div class="d-flex justify-content-end mb-4">
+            <a href="{% url 'trainer pending requests' %}"
+               class="btn btn-outline-danger btn-lg rounded-pill shadow-sm px-4 fw-bold">
+                <i class="bi bi-hourglass-split me-2"></i> Чакащи заявки
+            </a>
+        </div>
+
+
+        <h1 class="text-center fw-bold text-primary-emphasis mb-5 display-5 animate__animated animate__fadeInDown">
             <i class="bi bi-people-fill me-2 text-primary"></i> Моите клиенти
         </h1>
 
@@ -13,12 +29,17 @@
                         <div class="card h-100 shadow-sm border-0 animate-card">
                             <div class="card-body d-flex flex-column justify-content-between">
                                 <div class="d-flex align-items-center mb-3">
-                                    <div class="me-3">
-                                        <i class="bi bi-person-circle icon-lg"></i>
-                                    </div>
+                                    {% if client.user.profile_picture %}
+                                        <img src="{{ client.user.profile_picture.url }}" class="rounded-circle me-3"
+                                             width="50" height="50" alt="Профилна снимка">
+                                    {% else %}
+                                        <i class="bi bi-person-circle icon-lg text-primary me-3"></i>
+                                    {% endif %}
                                     <div>
-                                        <h5 class="mb-1 fw-semibold">{{ client.user.first_name }} {{ client.user.last_name }}</h5>
+                                        <h5 class="mb-1 fw-bold">{{ client.user.first_name }} {{ client.user.last_name }}</h5>
                                         <small class="text-muted">@{{ client.user.username }}</small>
+                                        <p class="text-muted mb-1"><i class="bi bi-bullseye me-1"></i>
+                                            Цел: {{ client.goals }}</p>
                                     </div>
                                 </div>
 
@@ -29,7 +50,8 @@
                                     </a>
 
                                     {% if client.has_program %}
-                                        <a href="{% url 'client_program' client.id %}" class="btn btn-primary w-100">
+                                        <a href="{% url 'client_program' client.id %}"
+                                           class="btn btn-primary w-100 mt-0">
                                             <i class="bi bi-card-list me-1"></i> Виж програмата
                                         </a>
                                     {% else %}
@@ -39,9 +61,17 @@
                                         </a>
                                     {% endif %}
 
-                                    <a href="{% url 'meal history' client.id %}" class="btn btn-outline-success w-100">
+                                    <a href="{% url 'meal history' client.id %}" class="btn btn-outline-warning w-100">
                                         <i class="bi bi-basket-fill me-1"></i> История на хранения
                                     </a>
+
+                                    <span class="text-muted small text-center mt-2">
+                                    {% if client.has_program %}
+                                        <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Има програма</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary"><i class="bi bi-hourglass-split me-1"></i> Без програма</span>
+                                    {% endif %}
+                                </span>
                                 </div>
                             </div>
                         </div>
@@ -49,44 +79,26 @@
                 {% endfor %}
             </div>
         {% else %}
-            <div class="alert alert-info text-center rounded-4 shadow-sm mt-4" role="alert">
+            <div class="alert alert-info text-center rounded-4 shadow-sm mt-4">
                 <i class="bi bi-emoji-frown fs-3"></i> Нямате свързани клиенти.
             </div>
         {% endif %}
     </div>
 
-{% endblock %}
-
-{% block extra_css %}
     <style>
         body {
             background-color: #f8f9fa;
         }
 
-        .container {
-            animation: fadeIn 0.6s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
-            border-radius: 15px;
+            border-radius: 18px;
             opacity: 0;
-            transform: translateY(15px);
-            animation: cardFadeIn 0.5s ease-in-out forwards;
+            transform: translateY(20px);
+            animation: fadeInCard 0.5s ease-in-out forwards;
         }
 
-        @keyframes cardFadeIn {
+        @keyframes fadeInCard {
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -94,8 +106,8 @@
         }
 
         .card:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0.8rem 1.5rem rgba(0, 0, 0, 0.15);
+            transform: scale(1.04);
+            box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
         }
 
         .btn {
@@ -104,26 +116,39 @@
             padding: 8px 12px;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, #007bff, #0056b3);
-            border: none;
-        }
-
-        .btn-outline-primary {
-            border: 2px solid #007bff;
-        }
-
         .btn-outline-warning {
             border: 2px solid #ffc107;
+            color: #ffc107;
         }
 
-        .btn-outline-success {
-            border: 2px solid #28a745;
+        .btn-outline-warning:hover {
+            background-color: #ffc107;
+            color: white;
         }
 
         .icon-lg {
-            font-size: 2rem;
-            color: #6c757d;
+            font-size: 2.5rem;
+        }
+
+        .animate__animated {
+            animation-duration: 1s;
+            animation-fill-mode: both;
+        }
+
+        .animate__fadeInDown {
+            animation-name: fadeInDown;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
     </style>
 {% endblock %}

@@ -30,14 +30,13 @@ def add_progress(request, client_id):
 
     if request.method == 'POST':
         progress_form = ProgressForm(request.POST)
-        new_goal = request.POST.get('goals')  # новата цел от формата
-        keep_same_trainer = request.POST.get('keep_same_trainer')  # дали искаме да останем със същия треньор
+        new_goal = request.POST.get('goals')
+        keep_same_trainer = request.POST.get('keep_same_trainer')
 
         if progress_form.is_valid():
             progress = progress_form.save(commit=False)
             progress.client = client
 
-            # Изчисляваме телесната мазнина както досега
             body_fat = calculate_body_fat_percentage(
                 gender=client.user.gender,
                 height=progress.height,
@@ -55,7 +54,6 @@ def add_progress(request, client_id):
 
             progress.save()
 
-            # Ако има нова цел и тя е различна от текущата цел
             if new_goal and new_goal != client.goals:
                 client.goals = new_goal
                 if keep_same_trainer == 'yes':
@@ -65,7 +63,6 @@ def add_progress(request, client_id):
                     client.save()
                     return redirect('suitable trainers')
 
-            # Ако целта не се променя, просто оставаме тук
             return redirect('current progress', client_id=client.pk)
 
     else:
@@ -92,6 +89,8 @@ def add_progress(request, client_id):
         'end_date': end_date,
         'client': client,
         'goals_choices': ClientGoals.choices(),
+        'is_client_user': hasattr(request.user, 'client') and request.user.client.id == client.id,
+
     }
     return render(request, 'progress/add_progress.html', context=context)
 
@@ -140,6 +139,7 @@ def client_progress_view(request, client_id, username=None):
         'weights': [float(p.weight) for p in progresses],
         'body_fat': [float(p.body_fat_percentage or 0) for p in progresses],
         'muscle_mass': [float(p.muscle_mass) if p.muscle_mass is not None else 0 for p in progresses],
+        'is_client_user': hasattr(request.user, 'client') and request.user.client.id == client.id,
     }
 
     return render(request, 'progress/progress_chart.html', context)

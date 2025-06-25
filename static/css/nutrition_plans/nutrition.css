@@ -1,0 +1,78 @@
+h2, h3, h4, h5 {
+    color: #212529;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.meal-block {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out;
+}
+.meal-block:hover {
+    transform: scale(1.01);
+}
+
+button[type="submit"],
+.add-food-btn,
+#add-meal-btn {
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-top: 20px;
+}
+button:hover,
+.add-food-btn:hover,
+#add-meal-btn:hover {
+    background: linear-gradient(90deg, #0056b3, #007bff);
+    transform: scale(1.04);
+}
+
+.remove-meal-btn,
+.remove-food-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 6px 10px;
+    font-size: 14px;
+    float: right;
+    margin-top: -10px;
+    margin-right: -10px;
+}
+.remove-meal-btn:hover,
+.remove-food-btn:hover {
+    background-color: #bb2d3b;
+}
+
+.food-item {
+    background: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+}
+.food-item label {
+    font-weight: 500;
+    margin-top: 10px;
+}
+.food-item input[type="text"],
+.food-item input[type="number"],
+.food-item select {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    margin-top: 4px;
+}
+.delete-checkbox {
+    display: none !important;
+}

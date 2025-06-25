@@ -1,0 +1,12 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-danger">Изтриване на клиент</h2>
+    <p>Сигурни ли сте, че искате да изтриете клиента <strong>{{ client.user.full_name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, изтрий</button>
+        <a href="{% url 'admin clients list' %}" class="btn btn-secondary">Отказ</a>
+    </form>
+</div>
+{% endblock %}

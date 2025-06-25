@@ -54,7 +54,6 @@
     background-color: #d62828;
 }
 
-/* Стилове за линковете */
 a {
     text-decoration: none;
     color: inherit;
@@ -64,7 +63,6 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Мобилни устройства */
 @media (max-width: 768px) {
     .card {
         margin-bottom: 20px;

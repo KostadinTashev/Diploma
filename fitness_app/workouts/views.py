@@ -13,20 +13,32 @@ from fitness_app.workouts.models import Workout, WorkoutExercise
 
 
 # Create your views here.
+@login_required
 def workout_list(request):
-    selected_category = request.GET.get('category', None)
+    selected_category = request.GET.get('category')
+    search_query = request.GET.get('search', '')
+
     categories = Workout.objects.values_list('category', flat=True).distinct().order_by('category')
+    workouts = Workout.objects.all()
 
     if selected_category:
-        workouts = Workout.objects.filter(category=selected_category).order_by('program_name')
-    else:
-        workouts = Workout.objects.all().order_by('program_name')
+        workouts = workouts.filter(category=selected_category)
 
-    return render(request, 'training_programs/program-list.html', {
+    if search_query:
+        workouts = workouts.filter(program_name__icontains=search_query)
+
+    workouts = workouts.order_by('program_name')
+
+    context = {
         'workouts': workouts,
         'categories': categories,
-        'selected_category': selected_category
-    })
+        'selected_category': selected_category,
+        'search_query': search_query,
+        'is_client': hasattr(request.user, 'client'),
+        'is_trainer': hasattr(request.user, 'trainer'),
+    }
+
+    return render(request, 'training_programs/program-list.html', context)
 
 
 @login_required
@@ -51,45 +63,28 @@ def workout_add(request):
 
 
 @login_required
-def workout_details(request, pk, client_id=None, username=None):
-    from django.utils.dateparse import parse_date
-    from django.utils import timezone
-
+def workout_details(request, pk):
     workout = get_object_or_404(Workout, pk=pk)
     exercises = WorkoutExercise.objects.filter(workout=workout)
-    client = Client.objects.filter(user__username=username).first()
 
-    if client_id is None and hasattr(request.user, 'client'):
-        client = request.user.client
-    elif client_id is not None:
-        client = get_object_or_404(Client, id=client_id)
-    else:
-        client = None
-
+    client = getattr(request.user, 'client', None)
     date_str = request.GET.get('date')
-    if date_str:
-        selected_date = parse_date(date_str)
-    else:
-        selected_date = timezone.now().date()
+    selected_date = parse_date(date_str) if date_str else timezone.localdate()
 
-    completed_exercises = []
+    completed_ids = []
     if client:
-        completed_exercises = CompletedExercise.objects.filter(
+        completed_ids = CompletedExercise.objects.filter(
             client=client,
-            exercise__in=[we.exercise for we in exercises],
+            workout_exercise__in=exercises,
             date=selected_date
-        ).values_list('exercise_id', flat=True)
-
-    has_client = hasattr(request.user, 'client')
+        ).values_list('workout_exercise_id', flat=True)
 
     context = {
         'workout': workout,
         'exercises': exercises,
-        'completed_exercises': completed_exercises,
-        'viewed_client': client,
-        'has_client': has_client,
-        'client': client,
+        'completed_exercises': completed_ids,
         'selected_date': selected_date,
+        'has_client': client is not None,
     }
     return render(request, 'training_programs/program-detail.html', context)
 

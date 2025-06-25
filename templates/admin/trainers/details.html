@@ -1,0 +1,35 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Детайли за треньор</h2>
+
+    {% if trainer.user.profile_picture %}
+        <div class="text-center mb-4">
+            <img src="{{ trainer.user.profile_picture.url }}" alt="Профилна снимка"
+                 class="img-thumbnail rounded-circle" style="max-height: 200px;">
+        </div>
+    {% else %}
+        <p class="text-muted text-center">Няма качена профилна снимка.</p>
+    {% endif %}
+
+    <ul class="list-group shadow-sm rounded-3">
+        <li class="list-group-item"><strong>Потребител:</strong> {{ trainer.user.username }}</li>
+        <li class="list-group-item"><strong>Име:</strong> {{ trainer.user.full_name }}</li>
+        <li class="list-group-item"><strong>Имейл:</strong> {{ trainer.user.email }}</li>
+        <li class="list-group-item"><strong>Специалност:</strong> {{ trainer.get_speciality_display }}</li>
+        <li class="list-group-item"><strong>Години опит:</strong> {{ trainer.years_of_experience }}</li>
+        <li class="list-group-item"><strong>Сертификати:</strong> {{ trainer.certifications }}</li>
+        <li class="list-group-item"><strong>Биография:</strong> {{ trainer.bio }}</li>
+        <li class="list-group-item"><strong>Телефон:</strong> {{ trainer.phone_number }}</li>
+    </ul>
+
+    <div class="mt-4 d-flex justify-content-between">
+        <a href="{% url 'admin trainer edit' trainer.id %}" class="btn btn-warning">
+            <i class="bi bi-pencil"></i> Редактирай
+        </a>
+        <a href="{% url 'admin trainers list' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left-circle"></i> Назад
+        </a>
+    </div>
+</div>
+{% endblock %}

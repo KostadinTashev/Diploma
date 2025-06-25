@@ -7,27 +7,10 @@
             <div class="text-center mb-4">
                 <img src="
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                         {% if client.user.profile_picture %}{{ client.user.profile_picture.url }}{% else %}{% static 'images/default-icon.jpg' %}{% endif %}"
                      class="rounded-circle border border-4 border-primary shadow-sm"
                      alt="Профилна снимка"
-                     width="150"
-                     height="150"
-                     style="object-fit: cover;">
+                     width="150" height="150" style="object-fit: cover;">
             </div>
 
             <h2 class="text-center fw-bold text-primary">{{ client.user.first_name }} {{ client.user.last_name }}</h2>
@@ -39,7 +22,7 @@
                 </a>
             </div>
 
-            <div class="list-group list-group-flush bg-light shadow-sm rounded">
+            <div class="list-group list-group-flush bg-light shadow-sm rounded mt-4">
                 <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
                     <strong class="text-secondary">Пол:</strong>
                     <span class="fw-semibold">{{ client.user.get_gender_display }}</span>
@@ -54,62 +37,83 @@
                     <strong class="text-secondary">Цел:</strong>
                     <span class="fw-semibold">{{ client.get_goals_display }}</span>
                 </div>
+                {% if latest_progress %}
+                    {% if latest_progress.height %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                            <strong class="text-secondary">Височина:</strong>
+                            <span class="fw-semibold">{{ latest_progress.height }} см</span>
+                        </div>
+                    {% endif %}
 
-                {% if client.height %}
-                    <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
-                        <strong class="text-secondary">Височина:</strong>
-                        <span class="fw-semibold">{{ client.height }} см</span>
+                    {% if latest_progress.weight %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                            <strong class="text-secondary">Тегло:</strong>
+                            <span class="fw-semibold">{{ latest_progress.weight }} кг</span>
+                        </div>
+                    {% endif %}
+
+                    {% if latest_progress.chest %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                            <strong class="text-secondary">Гръдна обиколка:</strong>
+                            <span class="fw-semibold">{{ latest_progress.chest }} см</span>
+                        </div>
+                    {% endif %}
+
+                    {% if latest_progress.neck %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                            <strong class="text-secondary">Врат:</strong>
+                            <span class="fw-semibold">{{ latest_progress.neck }} см</span>
+                        </div>
+                    {% endif %}
+
+                    {% if latest_progress.waist %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                            <strong class="text-secondary">Талия:</strong>
+                            <span class="fw-semibold">{{ latest_progress.waist }} см</span>
+                        </div>
+                    {% endif %}
+
+                    {% if latest_progress.hip %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                            <strong class="text-secondary">Ханш:</strong>
+                            <span class="fw-semibold">{{ latest_progress.hip }} см</span>
+                        </div>
+                    {% endif %}
+
+                    {% if latest_progress.body_fat_percentage %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
+                            <strong class="text-secondary">Подкожни мазнини:</strong>
+                            <span class="fw-semibold">{{ latest_progress.body_fat_percentage|floatformat:2 }} %</span>
+                        </div>
+                    {% endif %}
+
+                    {% if latest_progress.muscle_mass %}
+                        <div class="list-group-item d-flex justify-content-between bg-transparent">
+                            <strong class="text-secondary">Мускулна маса:</strong>
+                            <span class="fw-semibold">{{ latest_progress.muscle_mass|floatformat:2 }}</span>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="alert alert-info mt-4 text-center rounded-pill shadow-sm">
+                        Няма налични измервания за този клиент.
                     </div>
                 {% endif %}
 
-                {% if client.weight %}
-                    <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
-                        <strong class="text-secondary">Тегло:</strong>
-                        <span class="fw-semibold">{{ client.weight }} кг</span>
-                    </div>
-
-                {% endif %}
-                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
-                    <strong class="text-secondary">Гръдна обиколка:</strong>
-                    <span class="fw-semibold">{{ client.chest }} см</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
-                    <strong class="text-secondary">Врат:</strong>
-                    <span class="fw-semibold">{{ client.neck }} см</span>
-                </div>
-                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
-                    <strong class="text-secondary">Талия:</strong>
-                    <span class="fw-semibold">{{ client.waist }} см</span>
-                </div>
-
-                <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
-                    <strong class="text-secondary">Ханш:</strong>
-                    <span class="fw-semibold">{{ client.hip }} см</span>
-                </div>
-                {% if latest_progress and latest_progress.body_fat_percentage %}
-                    <div class="list-group-item d-flex justify-content-between bg-transparent border-bottom">
-                        <strong class="text-secondary">Подкожни мазнини:</strong>
-                        <span class="fw-semibold">{{ latest_progress.body_fat_percentage|floatformat:2 }} %</span>
-                    </div>
-                {% endif %}
-
-                {% if latest_progress and latest_progress.muscle_mass %}
-                    <div class="list-group-item d-flex justify-content-between bg-transparent">
-                        <strong class="text-secondary">Мускулна маса:</strong>
-                        <span class="fw-semibold">{{ latest_progress.muscle_mass|floatformat:2 }}</span>
-                    </div>
-                {% endif %}
             </div>
 
-            <button type="button" class="btn btn-secondary" onclick="previousStep()">Назад</button>
+            <div class="text-center mt-4">
+                {% if trainer_id %}
+                    <a href="{% url 'trainer clients' trainer_id=trainer_id %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left-circle"></i> Назад
+                    </a>
+                {% else %}
+                    <button type="button" class="btn btn-secondary" onclick="window.history.back();">
+                        <i class="bi bi-arrow-left"></i> Назад
+                    </button>
+                {% endif %}
+            </div>
         </div>
     </div>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
-    <script>
-        function previousStep() {
-            window.history.back();
-        }
-    </script>
 {% endblock %}
-

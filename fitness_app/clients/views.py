@@ -1,3 +1,4 @@
+from collections import defaultdict
 from decimal import Decimal
 
 from django.contrib import messages
@@ -5,8 +6,10 @@ from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_POST
 
-from fitness_app.clients.forms import ClientForm, PersonalInfoForm
+from fitness_app.clients.forms import ClientForm, PersonalInfoForm, ChangeTrainerForm
 from fitness_app.clients.models import Client, TrainerReview, AppReview
 from fitness_app.meals.models import Meal
 from fitness_app.nutrition_plans.models import NutritionPlan
@@ -37,7 +40,7 @@ def set_client_data(request, client_id):
 
             progress = progress_form.save(commit=False)
             progress.client = client
-            progress.progress_date = timezone.now().date()  # Задаваме датата тук автоматично
+            progress.progress_date = timezone.now().date()
 
             body_fat = calculate_body_fat_percentage(
                 gender=user.gender,
@@ -50,7 +53,7 @@ def set_client_data(request, client_id):
             if body_fat is not None:
                 progress.body_fat_percentage = Decimal(str(body_fat))
                 progress.muscle_mass = progress.weight * (
-                    Decimal('1') - (progress.body_fat_percentage / Decimal('100'))
+                        Decimal('1') - (progress.body_fat_percentage / Decimal('100'))
                 )
             else:
                 progress.body_fat_percentage = Decimal('0')
@@ -73,14 +76,21 @@ def set_client_data(request, client_id):
     return render(request, 'clients/set-client-data.html', context)
 
 
-def client_details(request, pk, username):
-    client = get_object_or_404(Client, pk=pk)
-    latest_progress = client.progress_set.order_by('-progress_date').first()
-    if client.user.username != username:
-        return render(request, 'error.html', {'message': 'Невалидно потребителско име!'})
+@login_required
+def client_details(request, client_id, username):
+    client = get_object_or_404(Client, pk=client_id)
 
-    return render(request, 'clients/client_details.html', {'client': client,
-                                                           'latest_progress': latest_progress})
+    latest_progress = client.progress_set.order_by('-progress_date').first()
+
+    trainer_id = None
+    if hasattr(request.user, 'trainer'):
+        trainer_id = request.user.trainer.id
+
+    return render(request, 'clients/client_details.html', {
+        'client': client,
+        'latest_progress': latest_progress,
+        'trainer_id': trainer_id,
+    })
 
 
 @login_required
@@ -91,7 +101,7 @@ def client_edit(request):
         form = PersonalInfoForm(request.POST, request.FILES, instance=user)
         if form.is_valid():
             form.save()
-            return redirect('client details', pk=user.client.id, username=user.username)
+            return redirect('client details', client_id=user.client.id, username=user.username)
     else:
         form = PersonalInfoForm(instance=user)
 
@@ -103,7 +113,6 @@ def client_delete(request):
         user = request.user
         user.delete()
         logout(request)
-        messages.success(request, "Профилът беше успешно изтрит.")
         return redirect('index')
 
     return render(request, 'clients/confirm_delete.html')
@@ -117,14 +126,17 @@ def dashboard(request, client_id, username):
     client = get_object_or_404(Client, pk=client_id)
 
     plan = NutritionPlan.objects.filter(client=client).first()
-    meals = Meal.objects.filter(plan=plan).prefetch_related('food_items__product').order_by('date')
 
     meals_by_day = {}
-    for meal in meals:
-        date = meal.date
-        meals_by_day.setdefault(date, []).append(meal)
 
-    program_exercises = ProgramExercise.objects.filter(client=client).select_related('workout')
+    if plan:
+        meals = Meal.objects.filter(plan=plan).prefetch_related('food_items__product').order_by('date')
+
+        for meal in meals:
+            date = meal.date
+            meals_by_day.setdefault(date, []).append(meal)
+
+    program_exercises = ProgramExercise.objects.filter(client=client).select_related('workout').order_by('date')
 
     workouts_by_day = {}
     for entry in program_exercises:
@@ -141,22 +153,66 @@ def dashboard(request, client_id, username):
         'user': request.user,
         'workouts_by_day': workouts_by_day,
         'meals_by_day': meals_by_day,
+        'has_plan': plan is not None,
     })
+
+
+# @require_POST
+# @login_required
+# def change_trainer(request, trainer_id):
+#     trainer = get_object_or_404(Trainer, id=trainer_id)
+#     client = request.user.client
+#
+#     # директна смяна
+#     client.trainer = trainer
+#     client.save()
+#
+#     return redirect('dashboard', client_id=client.id, username=request.user.username)
+
+
+@login_required
+def request_trainer(request, trainer_id):
+    client = request.user.client
+    trainer = get_object_or_404(Trainer, id=trainer_id)
+
+    if client.trainer:
+        return redirect('dashboard', client.id, request.user.username)
+
+    pending_requests = request.session.get('pending_requests', {})
+    pending_requests[str(client.id)] = trainer.id
+    request.session['pending_requests'] = pending_requests
+
+    return redirect('dashboard', client.id, request.user.username)
 
 
 def client_workouts_view(request, client_id, username):
     client = get_object_or_404(Client, pk=client_id, user__username=username)
-    program_by_day = {}
 
-    for program in client.programexercise_set.select_related('workout').all():
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
+
+    start_date = parse_date(start_date) if start_date else None
+    end_date = parse_date(end_date) if end_date else None
+
+    workouts_qs = client.programexercise_set.select_related('workout').all()
+
+    if start_date:
+        workouts_qs = workouts_qs.filter(date__gte=start_date)
+    if end_date:
+        workouts_qs = workouts_qs.filter(date__lte=end_date)
+
+    workouts_qs = workouts_qs.order_by('date')
+
+    program_by_day = {}
+    for program in workouts_qs:
         day = program.date
-        if day not in program_by_day:
-            program_by_day[day] = []
-        program_by_day[day].append(program.workout)
+        program_by_day.setdefault(day, []).append(program.workout)
 
     context = {
         'client': client,
-        'program_by_day': program_by_day,
+        'program_by_day': sorted(program_by_day.items()),
+        'start_date': start_date,
+        'end_date': end_date,
     }
     return render(request, 'clients/client_workouts_by_day.html', context)
 
@@ -189,20 +245,20 @@ def add_trainer_comment(request, trainer_id):
     return redirect('my trainer')
 
 
-def submit_app_review(request):
+def submit_app_review(request, client_id=None, username=None):
     if request.method == 'POST':
         rating = request.POST.get('rating')
         comment = request.POST.get('comment')
-        AppReview.objects.create(client=request.user.client, rating=rating, comment=comment)
-        return redirect('index')
-    return redirect('index')
+        client = request.user.client
+        AppReview.objects.create(client=request.user.client, rating=rating, comment=comment, is_approved=False)
+        return redirect('dashboard', client_id=client.id, username=request.user.username)
+    return redirect('dashboard', client_id=request.user.client.id, username=request.user.username)
 
 
 def client_settings(request, client_id, username):
     try:
         client = Client.objects.get(pk=client_id, user__username=username)
     except Client.DoesNotExist:
-        messages.error(request, "Клиентът не е намерен!")
         return redirect("dashboard", client_id=client_id, username=username)
 
     if request.method == "POST":
@@ -212,7 +268,6 @@ def client_settings(request, client_id, username):
         user.gender = request.POST.get("gender", user.gender)
         user.birth_date = request.POST.get("birth_date", user.birth_date)
 
-        # ✅ Обработка на профилна снимка
         profile_image = request.FILES.get("profile_image")
         if profile_image:
             user.profile_picture = profile_image
@@ -228,12 +283,10 @@ def client_settings(request, client_id, username):
             if new_password == confirm_password:
                 user.set_password(new_password)
             else:
-                messages.error(request, "Паролите не съвпадат.")
                 return redirect("client settings", client_id=client_id, username=username)
 
         user.save()
         client.save()
-        messages.success(request, "Настройките бяха успешно обновени!")
         return redirect("client settings", client_id=client_id, username=username)
 
     context = {

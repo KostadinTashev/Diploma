@@ -1,156 +1,67 @@
 {% extends 'base/base.html' %}
 {% block title %}{{ exercise.name }}{% endblock %}
 
-
-<style>
-    .exercise-container {
-        max-width: 700px;
-        margin: 40px auto;
-        padding: 20px;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-        text-align: center;
-    }
-
-    h1 {
-        font-weight: bold;
-        color: #007bff;
-    }
-
-    .details {
-        font-size: 1.1rem;
-        margin: 15px 0;
-    }
-
-    .description {
-        font-style: italic;
-        color: #555;
-    }
-
-    .btn-container {
-        margin-top: 20px;
-    }
-
-    .btn {
-        margin: 5px;
-        width: 100%;
-        font-weight: bold;
-    }
-</style>
-
 {% block page_content %}
-    <div class="container">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <button onclick="window.history.back()" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm">
-                <i class="bi bi-arrow-left-circle"></i> Назад
-            </button>
+    <div class="container py-5">
+
+        <div class="mb-4 d-flex justify-content-start">
+            <a href="{% url 'exercises' %}" class="btn btn-outline-secondary btn-lg rounded-pill shadow-sm">
+                <i class="bi bi-arrow-left-circle"></i> Назад към всички упражнения
+            </a>
         </div>
 
-        {% if has_client %}
-            <div class="d-flex justify-content-end">
-                <div class="btn-container">
-                    {% if ex.exercise.id in completed_exercises %}
-
-                        <button class="btn btn-success toggle-complete rounded-pill shadow-sm"
-                                data-exercise-id="{{ exercise.pk }}"
-                                data-completed="true"
-                                data-date="{{ selected_date|date:'Y-m-d' }}">
-                            <i class="bi bi-check-circle"></i> Изпълнено
-                        </button>
-                    {% else %}
-                        <button class="btn btn-danger toggle-complete rounded-pill shadow-sm"
-                                data-exercise-id="{{ exercise.pk }}"
-                                data-completed="false"
-                                data-date="{{ selected_date|date:'Y-m-d' }}">
-                            <i class="bi bi-x-circle"></i> Неизпълнено
-                        </button>
-                    {% endif %}
-                </div>
+        {% if not has_client %}
+            <div class="mb-4 d-flex justify-content-end">
+                <a href="{% url 'exercise edit' exercise.pk exercise.name %}" class="btn btn-warning">
+                    <i class="bi bi-pencil-square"></i> Редактирай
+                </a>
             </div>
         {% endif %}
 
-        <div class="exercise-container">
-            <h1>{{ exercise.name }}</h1>
+        {% if has_client %}
+            {% if workout_exercise %}
+                <div class="mb-4">
+                    <h4 class="mb-3">Изпълнение за {{ selected_date|date:"d.m.Y" }}:</h4>
+                    <form method="post" action="{% url 'exercise complete' workout_exercise.pk %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="date" value="{{ selected_date|date:'Y-m-d' }}">
+                        {% if is_completed %}
+                            <button type="submit" class="btn btn-success rounded-pill shadow-sm">
+                                <i class="bi bi-check-circle"></i> Изпълнено
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn btn-danger rounded-pill shadow-sm">
+                                <i class="bi bi-x-circle"></i> Неизпълнено
+                            </button>
+                        {% endif %}
+                    </form>
+                </div>
 
-            <p class="details"><strong>Категория:</strong> {{ exercise.get_category_display }}</p>
+            {% endif %}
+        {% endif %}
+
+        <div class="exercise-container">
+            <h1 class="fw-bold">{{ exercise.name }}</h1>
+            <p><strong>Категория:</strong> {{ exercise.get_category_display }}</p>
 
             {% if exercise.equipment %}
-                <p class="details"><strong>Оборудване:</strong> {{ exercise.equipment }}</p>
+                <p><strong>Оборудване:</strong> {{ exercise.equipment }}</p>
             {% endif %}
 
             {% if exercise.description %}
-                <p class="description"><strong>Начин на изпълнение:</strong> {{ exercise.description }}</p>
+                <p><strong>Начин на изпълнение:</strong> {{ exercise.description }}</p>
             {% else %}
-                <p class="description text-muted">Няма описание.</p>
+                <p class="text-muted">Няма описание.</p>
             {% endif %}
 
             {% if exercise.exercise_picture %}
                 <div class="text-center mt-3">
-                    <img src="{{ exercise.exercise_picture.url }}" alt="{{ exercise.name }}" class="img-fluid rounded">
+                    <img src="{{ exercise.exercise_picture.url }}" alt="{{ exercise.name }}"
+                         class="img-fluid rounded shadow-sm">
                 </div>
             {% else %}
-                <p class="description text-muted">Няма изображение</p>
-            {% endif %}
-
-            {% if not has_client and request.user.is_staff %}
-                <div class="btn-container mt-4">
-                    <a href="{% url 'exercise edit' exercise.pk exercise.name %}" class="btn btn-warning">Редактирай</a>
-                    <a href="{% url 'exercise delete' exercise.pk exercise.name %}" class="btn btn-danger">Изтрий</a>
-                    <a href="{% url 'exercises' %}" class="btn btn-secondary">Обратно към упражненията</a>
-                </div>
+                <p class="text-muted">Няма изображение.</p>
             {% endif %}
         </div>
     </div>
-
-    {% if has_client %}
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <script>
-            $(document).ready(function () {
-                $('.toggle-complete').click(function () {
-                    const btn = $(this);
-                    const exerciseId = btn.data('exercise-id');
-                    const completed = btn.data('completed');
-                    const selectedDate = btn.data('date');
-
-                    const url = completed ?
-                        "{% url 'exercise uncomplete' 0 %}".replace('0', exerciseId) :
-                        "{% url 'exercise complete' 0 %}".replace('0', exerciseId);
-
-                    $.ajax({
-                        url: url,
-                        type: 'POST',
-                        data: {
-                            csrfmiddlewaretoken: '{{ csrf_token }}',
-                            date: selectedDate
-                        },
-                        success: function () {
-                            // Промяна на бутона
-                            if (completed) {
-                                btn
-                                    .removeClass('btn-success')
-                                    .addClass('btn-danger')
-                                    .html('<i class="bi bi-x-circle"></i> Неизпълнено')
-                                    .data('completed', false);
-                            } else {
-                                btn
-                                    .removeClass('btn-danger')
-                                    .addClass('btn-success')
-                                    .html('<i class="bi bi-check-circle"></i> Изпълнено')
-                                    .data('completed', true);
-                            }
-
-                            // Актуализиране на URL адреса с новата дата
-                            const newUrl = `${window.location.pathname}?date=${selectedDate}`;
-                            window.history.replaceState(null, '', newUrl);
-                        },
-                        error: function () {
-                            alert('Грешка при заявката, моля опитайте пак.');
-                        }
-                    });
-                });
-            });
-        </script>
-    {% endif %}
 {% endblock %}
-

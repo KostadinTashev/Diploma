@@ -1,0 +1,12 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2>Изтриване на упражнение</h2>
+    <p>Сигурни ли сте, че искате да изтриете упражнението <strong>{{ exercise.name }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, изтрий</button>
+        <a href="{% url 'admin exercises list' %}" class="btn btn-secondary">Назад</a>
+    </form>
+</div>
+{% endblock %}

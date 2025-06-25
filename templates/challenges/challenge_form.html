@@ -1,0 +1,14 @@
+{% extends 'base/base.html' %}
+
+{% block page_content %}
+<div class="container py-4">
+    <h2 class="mb-4">{{ view.object.pk|yesno:"Редактиране на предизвикателство,Създаване на предизвикателство" }}</h2>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Запази</button>
+        <a href="{% url 'challenge list' %}" class="btn btn-secondary">Отказ</a>
+    </form>
+</div>
+{% endblock %}

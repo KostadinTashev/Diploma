@@ -18,114 +18,164 @@
 
 
 h2, h3, h4, h5 {
-    color: #212529;
-    font-weight: 600;
-    margin-bottom: 15px;
-}
+            color: #212529;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
 
-.meal-block {
-    background: white;
-    border: 1px solid #dee2e6;
-    border-radius: 12px;
-    padding: 25px;
-    margin-bottom: 30px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease-in-out;
-}
+        .meal-block {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease-in-out;
+        }
 
-.meal-block:hover {
-    transform: scale(1.01);
-}
+        .meal-block:hover {
+            transform: scale(1.01);
+        }
 
-button[type="submit"],
-.add-food-btn,
-#add-meal-btn {
-    background: linear-gradient(90deg, #007bff, #0056b3);
-    color: white;
-    border: none;
-    padding: 10px 22px;
-    font-size: 16px;
-    border-radius: 30px;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-    margin-top: 20px;
-}
+        button[type="submit"],
+        .add-food-btn,
+        #add-meal-btn,
+        .back-btn {
+            background: linear-gradient(90deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            margin-top: 20px;
+        }
 
-button:hover,
-.add-food-btn:hover,
-#add-meal-btn:hover {
-    background: linear-gradient(90deg, #0056b3, #007bff);
-    transform: scale(1.04);
-}
+        button:hover,
+        .add-food-btn:hover,
+        #add-meal-btn:hover,
+        .back-btn:hover {
+            background: linear-gradient(90deg, #0056b3, #007bff);
+            transform: scale(1.04);
+        }
 
-.remove-meal-btn,
-.remove-food-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 50px;
-    padding: 6px 10px;
-    font-size: 14px;
-    float: right;
-    margin-top: -10px;
-    margin-right: -10px;
-    transition: background 0.3s ease;
-}
+        .remove-meal-btn,
+        .remove-food-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 6px 10px;
+            font-size: 14px;
+            float: right;
+            margin-top: -10px;
+            margin-right: -10px;
+            transition: background 0.3s ease;
+        }
 
-.remove-meal-btn:hover,
-.remove-food-btn:hover {
-    background-color: #bb2d3b;
-}
+        .remove-meal-btn:hover,
+        .remove-food-btn:hover {
+            background-color: #bb2d3b;
+        }
 
-.food-item {
-    background: #f8f9fa;
-    padding: 15px;
-    margin-bottom: 12px;
-    border-radius: 8px;
-}
+        .food-item {
+            background: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
 
-.food-item label {
-    font-weight: 500;
-    margin-top: 10px;
-}
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 20px;
+        }
+        .food-item > div,
+        .food-item > label,
+        .food-item > input {
+            flex: 1;
+            min-width: 200px;
+        }
+        .food-item label {
+            font-weight: 500;
+            margin-top: 10px;
+        }
 
-.food-item input[type="text"],
-.food-item input[type="number"],
-.food-item select {
-    width: 100%;
-    padding: 8px 12px;
-    border: 1px solid #ced4da;
-    border-radius: 8px;
-    margin-top: 4px;
-}
+        .food-item input[type="text"],
+        .food-item input[type="number"],
+        .food-item select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+            margin-top: 4px;
+        }
 
-button[type="submit"] {
-    display: block;
-    width: auto;
-    margin: 30px auto 0 auto;
-}
+        button[type="submit"] {
+            display: block;
+            width: auto;
+            margin: 30px auto 0 auto;
+        }
 
-.add-food-btn {
-    margin-top: 10px;
-    background: #17a2b8;
-    border-radius: 25px;
-}
-.delete-checkbox {
-    display: none !important;
-}
-.add-food-btn:hover {
-    background: #138496;
-}
-
+        .add-food-btn {
+            margin-top: 10px;
+            background: #17a2b8;
+            border-radius: 25px;
+        }
+        .delete-checkbox {
+            display: none !important;
+        }
+        .add-food-btn:hover {
+            background: #138496;
+        }
+.top-buttons .btn btn-secondary {
+            order: 1;
+        }
+        .top-buttons h2 {
+            order: 2;
+            flex-grow: 1;
+            text-align: center;
+            margin: 0;
+        }
     </style>
 </head>
 <body>
-
+<div class="top-buttons">
+    <a href="{% url 'trainer nutrition clients' %}" class="btn btn-secondary">Назад</a>
+    <h2>Редактирай хранителен режим за {{ client.user.full_name }}</h2>
+</div>
 <form method="post" id="nutrition-edit-form" novalidate>
     {% csrf_token %}
-    <h2>Редактирай хранителен режим за {{ client.user.full_name }}</h2>
 
-    {{ plan_form.as_p }}
+    <div class="mb-3">
+    <label for="{{ plan_form.name.id_for_label }}" class="form-label">Име на плана</label>
+    {{ plan_form.name|add_class:"form-control" }}
+</div>
+
+<div class="mb-3">
+    <label for="{{ plan_form.description.id_for_label }}" class="form-label">Описание</label>
+    {{ plan_form.description|add_class:"form-control" }}
+</div>
+
+<div class="mb-3">
+    <label for="{{ plan_form.calories.id_for_label }}" class="form-label">Калории</label>
+    {{ plan_form.calories|add_class:"form-control" }}
+</div>
+
+<div class="mb-3">
+    <label for="{{ plan_form.carbohydrate.id_for_label }}" class="form-label">Въглехидрати</label>
+    {{ plan_form.carbohydrate|add_class:"form-control" }}
+</div>
+
+<div class="mb-3">
+    <label for="{{ plan_form.fats.id_for_label }}" class="form-label">Мазнини</label>
+    {{ plan_form.fats|add_class:"form-control" }}
+</div>
+
+<div class="mb-3">
+    <label for="{{ plan_form.proteins.id_for_label }}" class="form-label">Протеини</label>
+    {{ plan_form.proteins|add_class:"form-control" }}
+</div>
 
     <h3>Хранения</h3>
     {{ meal_formset.management_form }}
@@ -134,7 +184,23 @@ button[type="submit"] {
             <div class="meal-block" data-index="{{ forloop.counter0 }}">
                 <button type="button" class="remove-meal-btn" title="Изтрий хранене">🗑</button>
                 <h4>Хранене {{ forloop.counter }}</h4>
-                {{ meal_form.as_p }}
+                <div class="form-group">
+    {{ meal_form.meal.label_tag }} {{ meal_form.meal }}
+</div>
+<div class="form-group">
+    {{ meal_form.date.label_tag }} {{ meal_form.date }}
+</div>
+<div class="form-group">
+    {{ meal_form.description.label_tag }} {{ meal_form.description }}
+</div>
+
+{% if meal_form.id %}
+    {{ meal_form.id }}
+{% endif %}
+
+{% if meal_form.DELETE %}
+    {{ meal_form.DELETE|add_class:"delete-checkbox" }}
+{% endif %}
 
                 {% with food_formset=food_formsets|index:forloop.counter0 %}
                     {{ food_formset.management_form }}
@@ -142,19 +208,19 @@ button[type="submit"] {
                     <div class="food-items-container">
                         {% for form in food_formset %}
                             <div class="food-item">
-                                {{ form.id }}
+    {{ form.id }}
 
-                                {{ form.product_name.label_tag }} {{ form.product_name }}
-{{ form.product }}
+    {{ form.product_name.label_tag }} {{ form.product_name }}
+    {{ form.product }}
 
-                                {{ form.quantity.label_tag }} {{ form.quantity }}
+    {{ form.quantity.label_tag }} {{ form.quantity }}
 
-                                {% if form.DELETE %}
-                                    {{ form.DELETE|add_class:"delete-checkbox" }}
-                                {% endif %}
+    {% if form.DELETE %}
+        {{ form.DELETE|add_class:"delete-checkbox" }}
+    {% endif %}
 
-                                <button type="button" class="remove-food-btn" title="Изтрий продукт">✖</button>
-                            </div>
+    <button type="button" class="remove-food-btn" title="Изтрий продукт">✖</button>
+</div>
                         {% endfor %}
                     </div>
                     <button type="button" class="add-food-btn" data-meal-index="{{ forloop.counter0 }}">➕ Добави още продукт</button>
@@ -172,7 +238,22 @@ button[type="submit"] {
     <div class="meal-block" data-index="__prefix__">
         <button type="button" class="remove-meal-btn" title="Изтрий хранене">🗑</button>
         <h4>Хранене __number__</h4>
-        {{ empty_meal_form.as_p|safe }}
+
+        <div class="form-group">
+            {{ empty_meal_form.meal.label_tag }} {{ empty_meal_form.meal }}
+        </div>
+        <div class="form-group">
+            {{ empty_meal_form.date.label_tag }} {{ empty_meal_form.date }}
+        </div>
+        <div class="form-group">
+            {{ empty_meal_form.description.label_tag }} {{ empty_meal_form.description }}
+        </div>
+
+        {{ empty_meal_form.id }}
+
+        {% if empty_meal_form.DELETE %}
+            {{ empty_meal_form.DELETE|add_class:"delete-checkbox" }}
+        {% endif %}
 
         {{ empty_food_formset.management_form|safe }}
         <h5>Продукти:</h5>
@@ -185,7 +266,7 @@ button[type="submit"] {
 
                     {{ form.quantity.label_tag }} {{ form.quantity }}
 
-                    <input type="checkbox" name="foods-__prefix__-DELETE" class="delete-checkbox" style="display:none;" />
+                    <input type="checkbox" name="foods-__prefix__-DELETE" class="delete-checkbox" />
 
                     <button type="button" class="remove-food-btn" title="Изтрий продукт">✖</button>
                 </div>
@@ -201,7 +282,7 @@ button[type="submit"] {
         <input type="text" class="product-name-input" id="__prefix__-product_name" />
         <input type="hidden" name="" class="product-id-input" id="__prefix__-product" />
 
-        <label for="__prefix__-quantity">Количество</label>
+        <label for="__prefix__-quantity">Количество в грамове:</label>
         <input type="number" name="" id="__prefix__-quantity" min="1" />
 
         <input type="checkbox" name="" style="display:none;" class="delete-checkbox" />
@@ -294,7 +375,8 @@ $(function () {
         let totalMealForms = $("#id_meals-TOTAL_FORMS");
         let index = mealBlock.data("index");
 
-        let deleteCheckbox = mealBlock.find('input[type="checkbox"][name$="-DELETE"]');
+        let deleteCheckbox = mealBlock.find('input.delete-checkbox');
+
         if (deleteCheckbox.length) {
             deleteCheckbox.prop("checked", true);
             mealBlock.hide();

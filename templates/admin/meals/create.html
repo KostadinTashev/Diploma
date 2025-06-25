@@ -1,0 +1,12 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2>{% if meal %}Редакция на хранене{% else %}Създаване на ново хранене{% endif %}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">{% if meal %}Запази{% else %}Създай{% endif %}</button>
+        <a href="{% url 'admin meals list' %}" class="btn btn-secondary">Назад</a>
+    </form>
+</div>
+{% endblock %}

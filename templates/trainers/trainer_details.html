@@ -1,4 +1,5 @@
 {% extends 'base/base.html' %}
+{% load static %}
 {% block page_content %}
 
     <title>Профил | Сила+</title>
@@ -97,8 +98,11 @@
     <div class="container mt-5">
         <div class="profile-container text-center">
             <h1 class="text-center text-primary fw-bold"><i class="bi bi-person-circle"></i> Профил на треньора</h1>
-            <img src="{{ trainer.user.profile_picture.url }}" alt="Profile picture" class="profile-image">
-
+            {% if trainer.user.profile_picture %}
+                <img src="{{ trainer.user.profile_picture.url }}" alt="Profile picture" class="profile-image">
+            {% else %}
+                <img src="{% static 'images/default-icon.jpg' %}">
+            {% endif %}
             <div class="profile-details mt-4">
                 <p><strong>👤 Име:</strong> {{ trainer.user.first_name }}</p>
                 <p><strong>📛 Фамилия:</strong> {{ trainer.user.last_name }}</p>
@@ -112,16 +116,21 @@
                 <button type="button" class="btn btn-secondary btn-lg w-25" onclick="history.back()">
                     <i class="bi bi-arrow-left"></i> Назад
                 </button>
-                <a href="{% url 'trainer edit' trainer.id trainer.user.username %}" class="btn btn-primary btn-lg w-25">
-                    <i class="bi bi-pencil-fill"></i> Редактирай профила
-                </a>
-                <form action="{% url 'trainer delete' trainer.id trainer.user.username %}" method="post" class="w-25">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-lg w-100"
-                            onclick="return confirm('Сигурен ли си, че искаш да изтриеш профила си?')">
-                        <i class="bi bi-trash-fill"></i> Изтрий профила
-                    </button>
-                </form>
+
+                {% if is_owner %}
+                    <a href="{% url 'trainer edit' trainer.id trainer.user.username %}"
+                       class="btn btn-primary btn-lg w-25">
+                        <i class="bi bi-pencil-fill"></i> Редактирай профила
+                    </a>
+                    <form action="{% url 'trainer delete' trainer.id trainer.user.username %}" method="post"
+                          class="w-25">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg w-100"
+                                onclick="return confirm('Сигурен ли си, че искаш да изтриеш профила си?')">
+                            <i class="bi bi-trash-fill"></i> Изтрий профила
+                        </button>
+                    </form>
+                {% endif %}
             </div>
         </div>
     </div>

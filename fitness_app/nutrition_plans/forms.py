@@ -86,9 +86,12 @@ class MealEditForm(forms.ModelForm):
 
 
 class FoodItemEditForm(forms.ModelForm):
-    # product_name = forms.CharField(label="Продукт", widget=forms.TextInput(attrs={'class': 'product-name-input'}))
-    product_name = forms.CharField(required=False, label='Продукт (име)',
-                                   widget=forms.TextInput(attrs={'class': 'autocomplete-product'}))
+    product_name = forms.CharField(
+        required=False,
+        label='Продукт',
+        widget=forms.TextInput(attrs={'class': 'autocomplete-product'})
+    )
+
     class Meta:
         model = FoodItem
         fields = ['id', 'product', 'product_name', 'quantity']
@@ -100,15 +103,32 @@ class FoodItemEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
         if self.instance and self.instance.product_id:
             self.fields['product_name'].initial = self.instance.product.name
-            self.fields['product_name'].required = False
 
-    def clean_product(self):
-        product = self.cleaned_data.get('product')
-        if not product:
-            raise forms.ValidationError("Моля, изберете продукт от списъка.")
-        return product
+    def clean(self):
+        cleaned_data = super().clean()
+        product = cleaned_data.get('product')
+        product_name = cleaned_data.get('product_name')
+
+        if product and product_name:
+            # ако потребителят е променил името, а ID-то си остава — това е несъответствие
+            if product.name.strip().lower() != product_name.strip().lower():
+                # създаваме/взимаме нов продукт
+                product_obj, _ = Product.objects.get_or_create(name=product_name.strip())
+                cleaned_data['product'] = product_obj
+
+        elif product_name and not product:
+            # autocomplete не е избран, но име има
+            product_obj, _ = Product.objects.get_or_create(name=product_name.strip())
+            cleaned_data['product'] = product_obj
+
+        if not cleaned_data.get('product'):
+            self.add_error('product_name', 'Моля, изберете или въведете валиден продукт.')
+
+        return cleaned_data
+
 
 
 MealFormEditSet = inlineformset_factory(

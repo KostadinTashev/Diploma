@@ -1,0 +1,23 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2 class="text-danger mb-4">Изтриване на хранене</h2>
+
+    <div class="alert alert-warning">
+        Сигурни ли сте, че искате да изтриете това хранене?
+    </div>
+
+    <ul class="list-group mb-4">
+        <li class="list-group-item"><strong>Клиент:</strong> {{ meal.client.user.full_name }}</li>
+        <li class="list-group-item"><strong>Тип хранене:</strong> {{ meal.get_meal_display }}</li>
+        <li class="list-group-item"><strong>Дата:</strong> {{ meal.date }}</li>
+        <li class="list-group-item"><strong>Описание:</strong> {{ meal.description }}</li>
+    </ul>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Изтрий</button>
+        <a href="{% url 'admin meals list' %}" class="btn btn-secondary">Отказ</a>
+    </form>
+</div>
+{% endblock %}

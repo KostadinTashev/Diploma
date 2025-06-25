@@ -1,0 +1,39 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+    <div class="container mt-5">
+        <h2>Детайли за клиент</h2>
+
+        {% if client.user.profile_picture %}
+            <div class="text-center mb-4">
+                <img src="{{ client.user.profile_picture.url }}" alt="Профилна снимка" class="img-thumbnail"
+                     style="max-height: 200px;">
+            </div>
+        {% else %}
+            <p class="text-muted text-center">Няма качена профилна снимка.</p>
+        {% endif %}
+
+        <ul class="list-group">
+            <li class="list-group-item"><strong>Име:</strong> {{ client.user.full_name }}</li>
+            <li class="list-group-item"><strong>Имейл:</strong> {{ client.user.email }}</li>
+            <li class="list-group-item"><strong>Цел:</strong> {{ client.get_goals_display }}</li>
+            <li class="list-group-item"><strong>Треньор:</strong>
+                <td>
+                    {% if client.trainer %}
+                        {{ client.trainer.user.full_name }}
+                    {% else %}
+                        -
+                    {% endif %}
+                </td>
+            </li>
+        </ul>
+
+        <div class="mt-4 d-flex justify-content-between">
+            <a href="{% url 'admin client edit' client.id %}" class="btn btn-warning">
+                <i class="bi bi-pencil"></i> Редактирай
+            </a>
+            <a href="{% url 'admin clients list' %}" class="btn btn-secondary">
+                <i class="bi bi-arrow-left-circle"></i> Назад
+            </a>
+        </div>
+    </div>
+{% endblock %}

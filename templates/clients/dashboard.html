@@ -15,8 +15,8 @@
 <div class="container-fluid">
     <div class="row min-vh-100">
         <nav class="col-md-3 p-3 bg-light d-flex flex-column align-items-center">
-            {% if user.profile.image %}
-                <img src="{{ user.profile.image.url }}" alt="Аватар на {{ user.get_full_name }}" class="avatar"/>
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Аватар на {{ user.get_full_name }}" class="avatar"/>
             {% else %}
                 <div class="avatar bg-secondary text-white d-flex justify-content-center align-items-center fs-4">
                     {{ user.first_name|default:"?"|slice:":1" }}{{ user.last_name|default:"?"|slice:":1" }}
@@ -36,13 +36,23 @@
                 <li class="nav-item">
                     <a href="{% url 'client workouts' client.pk client.user.username %}"
                        class="nav-link {% if request.resolver_match.url_name == 'client workouts' %}active{% endif %}">
-                        <i class="bi bi-person-badge me-2"></i>Тренировки
+                        <i class="bi bi-person-badge me-2"></i>Тренировъчна програма
                     </a>
                 </li>
                 <li class="nav-item">
                     <a href="{% url 'calorie calculator' %}"
                        class="nav-link {% if request.resolver_match.url_name == 'calorie calculator' %}active{% endif %}">
-                        <i class="bi bi-calculator me-2"></i>Калориен Калкулатор
+                        <i class="bi bi-calculator me-2"></i>Калориен калкулатор
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'workout list' %}">
+                        <i class="bi bi-collection-play"></i> Всички тренировки
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'exercises' %}">
+                        <i class="bi bi-bounding-box-circles"></i> Всички упражнения
                     </a>
                 </li>
                 <li class="nav-item">
@@ -66,7 +76,7 @@
             </ul>
         </nav>
 
-        <main class="col-md-9 p-4 bg-white">
+        <main class="col-md-9 p-4 bg-white text-center text-dark shadow-sm rounded-3">
             <h1>Добре дошли, {{ user.first_name }}!</h1>
 
 
@@ -97,11 +107,9 @@
 
 
             <div class="mt-5">
+                <h3>Хранителен режим по дни:</h3>
 
-
-                <div class="mt-5">
-                    <h3>Хранителен режим по дни:</h3>
-
+                {% if has_plan %}
                     {% if meals_by_day %}
                         <div class="accordion" id="nutritionPlanAccordion">
                             {% for day, meals in meals_by_day.items %}
@@ -123,8 +131,7 @@
                                             {% for meal in meals %}
                                                 <div class="mb-4 p-3 border-start border-4 border-primary rounded shadow-sm bg-white">
                                                     <h5 class="text-secondary">{{ meal.meal }}
-                                                        - {{ meal.description }}</h5>
-
+                                                        – {{ meal.description }}</h5>
                                                     <ul class="list-group list-group-flush">
                                                         {% for item in meal.food_items.all %}
                                                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -141,9 +148,11 @@
                             {% endfor %}
                         </div>
                     {% else %}
-                        <p class="text-muted">Все още няма добавен хранителен режим.</p>
+                        <p class="text-muted">Все още няма въведени хранения към вашия хранителен план.</p>
                     {% endif %}
-                </div>
+                {% else %}
+                    <p class="text-muted">Все още нямате създаден хранителен план.</p>
+                {% endif %}
             </div>
 
             <section class="py-5 bg-light rounded shadow-sm">
@@ -153,7 +162,7 @@
                     {% if existing_review %}
                         <p class="text-muted">Вече сте оценили приложението с {{ existing_review.rating }} звезди.</p>
                     {% else %}
-                        <form method="post" action="{% url 'submit_app_review' %}">
+                        <form method="post" action="{% url 'submit app review' %}">
                             {% csrf_token %}
                             <div class="mb-3 star-rating">
                                 {% for i in "12345" %}
@@ -175,30 +184,30 @@
                 </div>
             </section>
 
-            <section class="py-5">
-                <div class="container">
-                    <h2 class="fw-bold text-center mb-4">Какво казват клиентите</h2>
-
-                    {% if reviews %}
-                        <div class="row g-4">
-                            {% for review in reviews %}
-                                <div class="col-md-4">
-                                    <div class="card shadow-sm border-0 p-3">
-                                        <div class="d-flex align-items-center mb-2">
-                                            <i class="bi bi-star-fill text-warning fs-3"></i>
-                                            <span class="ms-2 fw-semibold">{{ review.rating }} ⭐</span>
-                                        </div>
-                                        <p class="text-muted">{{ review.comment }}</p>
-                                        <small class="text-secondary">{{ review.client.user.get_full_name }}</small>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    {% else %}
-                        <p class="text-muted text-center">Все още няма оставени отзиви.</p>
-                    {% endif %}
-                </div>
-            </section>
+            {#            <section class="py-5">#}
+            {#                <div class="container">#}
+            {#                    <h2 class="fw-bold text-center mb-4">Какво казват клиентите</h2>#}
+            {##}
+            {#                    {% if reviews %}#}
+            {#                        <div class="row g-4">#}
+            {#                            {% for review in reviews %}#}
+            {#                                <div class="col-md-4">#}
+            {#                                    <div class="card shadow-sm border-0 p-3">#}
+            {#                                        <div class="d-flex align-items-center mb-2">#}
+            {#                                            <i class="bi bi-star-fill text-warning fs-3"></i>#}
+            {#                                            <span class="ms-2 fw-semibold">{{ review.rating }} ⭐</span>#}
+            {#                                        </div>#}
+            {#                                        <p class="text-muted">{{ review.comment }}</p>#}
+            {#                                        <small class="text-secondary">{{ review.client.user.get_full_name }}</small>#}
+            {#                                    </div>#}
+            {#                                </div>#}
+            {#                            {% endfor %}#}
+            {#                        </div>#}
+            {#                    {% else %}#}
+            {#                        <p class="text-muted text-center">Все още няма оставени отзиви.</p>#}
+            {#                    {% endif %}#}
+            {#                </div>#}
+            {#            </section>#}
         </main>
     </div>
 </div>

@@ -1,0 +1,14 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <div class="alert alert-danger">
+        <h4>Сигурни ли сте, че искате да изтриете този прогрес?</h4>
+        <p><strong>Клиент:</strong> {{ progress.client.user.full_name }} | <strong>Дата:</strong> {{ progress.progress_date }}</p>
+    </div>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Изтрий</button>
+        <a href="{% url 'admin progress list' %}" class="btn btn-secondary">Назад</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,17 @@
+{% extends 'base/base.html' %}
+{% block page_content %}
+<div class="container py-5">
+    <h2 class="text-center mb-4">Смени треньора си</h2>
+    <form method="post" class="mx-auto" style="max-width: 400px;">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.trainer.label_tag }}
+            {{ form.trainer }}
+            {% if form.trainer.errors %}
+                <div class="text-danger small">{{ form.trainer.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Запази</button>
+    </form>
+</div>
+{% endblock %}

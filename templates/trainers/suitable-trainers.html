@@ -58,7 +58,12 @@
             {% for trainer in suitable_trainers %}
                 <div class="col-md-4 mb-4">
                     <div class="card shadow-lg">
+                        {% if trainer.user.profile_picture and trainer.user.profile_picture.name %}
+
                         <img src="{{ trainer.user.profile_picture.url }}" class="card-img-top" alt="{{ trainer.user.full_name }}">
+                        {% else %}
+                        <img src="{% static 'images/default-icon.jpg' %}" class="card-img-top" alt="{{ trainer.user.full_name }}">
+                        {% endif %}
                         <div class="card-body text-center">
                             <h5>
                                 <a href="{% url 'trainer details' trainer.id trainer.user.first_name %}" class="text-dark text-decoration-none">
@@ -70,7 +75,7 @@
                             <p class="mb-3"><strong>Телефон:</strong> {{ trainer.phone_number }}</p>
                         </div>
                         <div class="card-footer text-center">
-                            <a href="{% url 'choose trainer' trainer.id %}" class="btn btn-primary">Избери този треньор</a>
+                            <a href="{% url 'send trainer request' trainer.id %}" class="btn btn-primary">Избери този треньор</a>
                         </div>
                     </div>
                 </div>

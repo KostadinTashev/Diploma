@@ -73,12 +73,7 @@
                     <a class="nav-link" href="{% url 'admin dashboard' %}"><i class="bi bi-house-door-fill"></i> Начало</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/admin/accounts/fitnessuser"><i class="bi bi-people-fill"></i>
-                        Потребители</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link text-warning" href="{% url 'logout user' %}"><i
-                            class="bi bi-box-arrow-right"></i> Изход</a>
+                    <a class="nav-link text-warning" href="{% url 'logout user' %}"><i class="bi bi-box-arrow-right"></i> Изход</a>
                 </li>
             </ul>
         </div>
@@ -95,7 +90,6 @@
     </div>
 
     <div id="stats-container" class="row mt-4"></div>
-
     <div id="sections-container" class="row mt-4"></div>
 </div>
 
@@ -125,42 +119,49 @@
             title: "Потребители",
             description: "Управлявай регистрираните потребители.",
             color: "primary",
-            link: "/admin/accounts/fitnessuser"
+            link: "{% url 'admin users list' %}"
         },
         {
             icon: "person-badge",
             title: "Треньори",
             description: "Редактирай информацията за треньорите.",
             color: "success",
-            link: "/admin/trainers/trainer"
+            link: "{% url 'admin trainers list' %}"
         },
         {
             icon: "person",
             title: "Клиенти",
             description: "Достъп до клиентските профили.",
             color: "warning",
-            link: "/admin/clients/client"
+            link: "{% url 'admin clients list' %}"
+        },
+        {
+            icon: "person",
+            title: "Отзиви",
+            description: "Достъп до клиентските отзиви.",
+            color: "warning",
+            link: "{% url 'admin reviews list' %}"
         },
         {
             icon: "bar-chart-fill",
             title: "Прогреси",
             description: "Прегледай данни за напредъка на клиентите.",
             color: "info",
-            link: "/admin/progress/progress/"
+            link: "{% url 'admin progress list' %}"
         },
         {
             icon: "dumbbell",
             title: "Упражнения",
             description: "Управление на упражнения и тренировки.",
             color: "secondary",
-            link: "/admin/exercises/exercise/"
+            link: "{% url 'admin exercises list' %}"
         },
         {
             icon: "clipboard-heart",
             title: "Режими",
             description: "Управление на хранителни и тренировъчни режими.",
             color: "dark",
-            link: "/admin/nutrition_plans/nutritionplan/"
+            link: "{% url 'admin plans list' %}"
         },
     ];
 

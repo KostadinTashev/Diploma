@@ -9,7 +9,7 @@
         }
 
         .meal-header {
-            background: linear-gradient(90deg, #007bff, #0056b3); /* Синя цветова схема */
+            background: linear-gradient(90deg, #007bff, #0056b3);
             color: white;
             padding: 0.75rem 1.5rem;
             font-size: 1.3rem;
@@ -64,16 +64,23 @@
             transition: width 0.6s ease-in-out;
         }
     </style>
-    <div class="d-flex justify-content-between align-items-center mb-3">
-    <a class="btn btn-outline-secondary btn-sm rounded-pill shadow-sm px-3"
-       href="{% url 'calorie calculator' %}">
-        <i class="bi bi-arrow-left-circle"></i> Назад
-    </a>
+    <div class="position-relative mb-4">
+        {% if is_trainer %}
+            <a href="{% url 'trainer clients' trainer_id %}"
+               class="btn btn-outline-secondary btn-sm rounded-pill shadow-sm px-3 position-absolute start-0">
+                <i class="bi bi-arrow-left-circle"></i> Назад към клиентите
+            </a>
+        {% else %}
+            <a href="{% url 'calorie calculator' %}"
+               class="btn btn-outline-secondary btn-sm rounded-pill shadow-sm px-3 position-absolute start-0">
+                <i class="bi bi-arrow-left-circle"></i> Назад
+            </a>
+        {% endif %}
 
-    <h2 class="text-primary fw-bold flex-grow-1 text-center">
-        <i class="bi bi-calendar-week"></i> История на храненията
-    </h2>
-</div>
+        <h2 class="text-primary fw-bold text-center">
+            <i class="bi bi-calendar-week"></i> История на храненията
+        </h2>
+    </div>
 
 
     <form method="get" class="row g-3 mb-4 align-items-end justify-content-center">
@@ -100,7 +107,7 @@
                             {% for item in meal.food_items.all %}
                                 <li class="list-group-item">
                                     <div>
-                                        <i class="bi bi-nut-fill"></i> {{ item.product.name }} —
+                                        <i class="bi bi-basket2-fill"></i> {{ item.product.name }} —
                                         <strong>{{ item.quantity }}g</strong>
                                     </div>
                                     <div class="text-end">

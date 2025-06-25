@@ -9,8 +9,10 @@ from fitness_app.accounts.models import FitnessUser
 
 class ClientGoals(str, ChoicesStringsMixin, Enum):
     ОТСЛАБВАНЕ = "Отслабване"
-    МУСКУЛНА_МАСА = "Мускулна маса"
-    ЗДРАВОСЛОВНО_ХРАНЕНЕ = "Здравословно хранене"
+    МУСКУЛНА_МАСА = "Покачване на мускулна маса"
+    СТЯГАНЕ = "Стягане и тонизиране"
+    ИЗДРЪЖЛИВОСТ = "Подобряване на издръжливостта"
+    СИЛА = "Повишаване на сила"
     ПОДДЪРЖАНЕ_НА_ТЕГЛО = "Поддържане на тегло"
 
 
@@ -28,7 +30,7 @@ class Client(models.Model):
     )
 
     trainer = models.ForeignKey(
-        Trainer,
+        'trainers.Trainer',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
@@ -48,6 +50,7 @@ class AppReview(models.Model):
     rating = models.PositiveSmallIntegerField(choices=[(i, str(i)) for i in range(1, 6)])
     comment = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.client.user.email} - {self.rating}"
@@ -62,3 +65,10 @@ class TrainerReview(models.Model):
 
     def __str__(self):
         return f"{self.client.user.email} ➤ {self.trainer.user.email} - {self.rating}"
+
+
+class TrainerRequest(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    trainer = models.ForeignKey('trainers.Trainer', on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    is_approved = models.BooleanField(default=False)

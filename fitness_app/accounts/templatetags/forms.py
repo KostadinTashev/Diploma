@@ -15,3 +15,12 @@ def form_field_class(form_field, className):
     form_field.field.widget.attrs['class'] = default_class + ' ' + className
     return form_field
 
+
+@register.filter
+def get_attr(obj, attr):
+    try:
+        for part in attr.split('.'):
+            obj = getattr(obj, part)
+        return obj
+    except Exception:
+        return ''

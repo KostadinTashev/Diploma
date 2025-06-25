@@ -36,6 +36,9 @@
         <div class="d-grid gap-2">
             <button type="submit" class="btn btn-danger">Вход</button>
         </div>
+        <div class="text-center mt-3">
+            <a href="{% url 'password_reset' %}" class="text-decoration-none">Забравена парола?</a>
+        </div>
     </form>
     <p class="mt-3 text-center">
         Нямате профил? <a href="{% url 'register user' %}">Регистрирайте се</a>

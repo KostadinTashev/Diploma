@@ -1,127 +1,137 @@
-{% load custom_filters %}
+{% extends 'base/base.html' %}
+{% load form_tags %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="bg">
-<head>
-    <meta charset="UTF-8">
-    <title>Създай хранителен режим</title>
+{% load custom_filters %}
 
-    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+{% block page_content %}
+<div class="container py-5">
+<div class="top-buttons">
+    <a href="{% url 'trainer nutrition clients' %}" class="btn btn-secondary">Назад</a>
+    <h2 class="mb-4 text-center">Създай хранителен режим за {{ client.user.full_name }}</h2>
+</div>
 
-    <style>
-        body { max-width: 900px; margin: 2rem auto; font-family: sans-serif; }
-        h2, h3, h4, h5 { color: #333; }
-        .meal-block { background: #fff; padding: 15px 20px; margin-bottom: 25px; border: 1px solid #ddd; border-radius: 6px; }
-        .add-food-btn, #add-meal-btn, button[type="submit"] {
-            background-color: #28a745; color: white; padding: 10px 18px;
-            border-radius: 5px; border: none; cursor: pointer;
-            margin-top: 10px;
-        }
-        .food-items-container > div {
-            margin-bottom: 10px;
-        }
-        .food-item label {
-            display: block;
-            margin-top: 8px;
-            font-weight: 600;
-        }
-        .food-item input[type=text], .food-item input[type=number] {
-            width: 200px;
-            padding: 5px;
-        }
-    </style>
-</head>
-<body>
 
-<form method="post" id="nutrition-form" novalidate>
-    {% csrf_token %}
-    <h2>Създай хранителен режим за {{ client.user.full_name }}</h2>
+    <form method="post" id="nutrition-form" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+    <label for="{{ plan_form.name.id_for_label }}" class="form-label">Име на плана</label>
+    {{ plan_form.name|add_class:"form-control" }}
+</div>
 
-    {{ plan_form.as_p }}
+<div class="mb-3">
+    <label for="{{ plan_form.description.id_for_label }}" class="form-label">Описание</label>
+    {{ plan_form.description|add_class:"form-control" }}
+</div>
 
-    <h3>Добави хранения</h3>
-    {{ meal_formset.management_form }}
-    <div id="meals-container">
-        {% for meal_form in meal_formset %}
-            <div class="meal-block" data-index="{{ forloop.counter0 }}">
-                <button type="button" class="remove-meal-btn">🗑 Изтрий хранене</button>
-                <h4>Хранене {{ forloop.counter }}</h4>
-                {{ meal_form.as_p }}
+<div class="mb-3">
+    <label for="{{ plan_form.calories.id_for_label }}" class="form-label">Калории</label>
+    {{ plan_form.calories|add_class:"form-control" }}
+</div>
 
-                {% with food_formset=food_formsets|index:forloop.counter0 %}
-                    {{ food_formset.management_form }}
-                    <h5>Продукти:</h5>
-                    <div class="food-items-container">
-                        {% for form in food_formset %}
-                            <div class="food-item">
-                                <label for="{{ form.product.id_for_label }}_name">Продукт</label>
-                                <input type="text" class="product-name-input" id="{{ form.product.id_for_label }}_name" />
-                                <input type="hidden" name="{{ form.product.html_name }}" class="product-id-input" id="{{ form.product.id_for_label }}" />
+<div class="mb-3">
+    <label for="{{ plan_form.carbohydrate.id_for_label }}" class="form-label">Въглехидрати</label>
+    {{ plan_form.carbohydrate|add_class:"form-control" }}
+</div>
 
-                                {{ form.quantity.label_tag }} {{ form.quantity }}
+<div class="mb-3">
+    <label for="{{ plan_form.fats.id_for_label }}" class="form-label">Мазнини</label>
+    {{ plan_form.fats|add_class:"form-control" }}
+</div>
 
-                                {{ form.DELETE }}
+<div class="mb-3">
+    <label for="{{ plan_form.proteins.id_for_label }}" class="form-label">Протеини</label>
+    {{ plan_form.proteins|add_class:"form-control" }}
+</div>
 
-                                <button type="button" class="remove-food-btn">✖</button>
-                            </div>
-                        {% endfor %}
-                    </div>
-                    <button type="button" class="add-food-btn" data-meal-index="{{ forloop.counter0 }}">➕ Добави още продукт</button>
-                {% endwith %}
-            </div>
-        {% endfor %}
-    </div>
+        <h3>Добави хранения</h3>
+        {{ meal_formset.management_form }}
+        <div id="meals-container">
+            {% for meal_form in meal_formset %}
+                <div class="meal-block" data-index="{{ forloop.counter0 }}">
+                    <button type="button" class="remove-meal-btn btn btn-danger btn-sm float-end">🗑</button>
+                    <h4>Хранене {{ forloop.counter }}</h4>
+                    {{ meal_form.as_p }}
 
-    <button type="button" id="add-meal-btn">➕ Добави още хранене</button>
-    <br><br>
-    <button type="submit">✅ Създай режим</button>
-</form>
+                    {% with food_formset=food_formsets|index:forloop.counter0 %}
+                        {{ food_formset.management_form }}
+                        <h5>Продукти:</h5>
+                        <div class="food-items-container">
+                            {% for form in food_formset %}
+                                <div class="food-item">
+                                    <label for="{{ form.product.id_for_label }}_name">Продукт</label>
+                                    <input type="text" class="product-name-input" id="{{ form.product.id_for_label }}_name" />
+                                    <input type="hidden" name="{{ form.product.html_name }}" class="product-id-input" id="{{ form.product.id_for_label }}" />
 
-<!-- шаблон за ново хранене -->
-<div id="meal-template" style="display: none;">
-    <div class="meal-block" data-index="__prefix__">
-        <button type="button" class="remove-meal-btn">🗑 Изтрий хранене</button>
-        <h4>Хранене __number__</h4>
-        {{ empty_meal_form.as_p|safe }}
-
-        {{ empty_food_formset.management_form|safe }}
-        <h5>Продукти:</h5>
-        <div class="food-items-container">
-            {% for form in empty_food_formset %}
-                <div class="food-item">
-                    <label for="id_foods-__prefix__-product_name">Продукт</label>
-                    <input type="text" class="product-name-input" id="id_foods-__prefix__-product_name" />
-                    <input type="hidden" name="foods-__prefix__-product" class="product-id-input" id="id_foods-__prefix__-product" />
-
-                    {{ form.quantity.label_tag }} {{ form.quantity }}
-
-                    {{ form.DELETE }}
-
-                    <button type="button" class="remove-food-btn">✖</button>
+                                    {{ form.quantity.label_tag }} {{ form.quantity }}
+                                    {{ form.DELETE }}
+                                    <button type="button" class="remove-food-btn btn btn-outline-danger btn-sm">✖</button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="button" class="add-food-btn btn btn-outline-success btn-sm mt-2" data-meal-index="{{ forloop.counter0 }}">➕ Добави продукт</button>
+                    {% endwith %}
                 </div>
             {% endfor %}
         </div>
-        <button type="button" class="add-food-btn" data-meal-index="__prefix__">➕ Добави още продукт</button>
-    </div>
-</div>
 
-<!-- шаблон за нов продукт -->
-<div id="food-item-template" style="display:none;">
-    <div class="food-item">
+        <button type="button" id="add-meal-btn" class="btn btn-primary mt-3">➕ Добави още хранене</button>
+        <br><br>
+        <button type="submit" class="btn btn-success">✅ Създай режим</button>
+    </form>
+
+    <div id="meal-template" style="display: none;">
+        <div class="meal-block" data-index="__prefix__">
+            <button type="button" class="remove-meal-btn btn btn-danger btn-sm float-end">🗑</button>
+            <h4>Хранене __number__</h4>
+            {{ empty_meal_form.as_p|safe }}
+
+            {{ empty_food_formset.management_form|safe }}
+            <h5>Продукти:</h5>
+            <div class="food-items-container">
+                {% for form in empty_food_formset %}
+                   <div class="food-item">
+    <div>
         <label for="__prefix__-product_name">Продукт</label>
         <input type="text" class="product-name-input" id="__prefix__-product_name" />
         <input type="hidden" name="" class="product-id-input" id="__prefix__-product" />
+    </div>
 
+    <div>
         <label for="__prefix__-quantity">Количество</label>
         <input type="number" name="" id="__prefix__-quantity" min="1" />
+    </div>
 
-        <input type="checkbox" name="" style="display:none;" class="delete-checkbox" />
+    <input type="checkbox" name="" style="display:none;" class="delete-checkbox" />
+    <button type="button" class="remove-food-btn btn btn-outline-danger btn-sm">✖</button>
+</div>
+                {% endfor %}
+            </div>
+            <button type="button" class="add-food-btn btn btn-outline-success btn-sm mt-2" data-meal-index="__prefix__">➕ Добави продукт</button>
+        </div>
+    </div>
 
-        <button type="button" class="remove-food-btn">✖</button>
+    <div id="food-item-template" style="display:none;">
+        <div class="food-item">
+    <div>
+        <label for="__prefix__-product_name">Продукт</label>
+        <input type="text" class="product-name-input" id="__prefix__-product_name" />
+        <input type="hidden" name="" class="product-id-input" id="__prefix__-product" />
+    </div>
+
+    <div>
+        <label for="__prefix__-quantity">Количество</label>
+        <input type="number" name="" id="__prefix__-quantity" min="1" />
+    </div>
+
+    <input type="checkbox" name="" style="display:none;" class="delete-checkbox" />
+    <button type="button" class="remove-food-btn btn btn-outline-danger btn-sm">✖</button>
+</div>
     </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
 <script>
 $(function () {
@@ -158,7 +168,6 @@ $(function () {
 
     activateAutocomplete();
 
-    // Добавяне на ново хранене
     $("#add-meal-btn").on("click", function () {
         let mealsContainer = $("#meals-container");
         let totalMealForms = $("#id_meals-TOTAL_FORMS");
@@ -174,7 +183,6 @@ $(function () {
         activateAutocomplete();
     });
 
-    // Добавяне на нов продукт към хранене
     $("#meals-container").on("click", ".add-food-btn", function () {
         let mealIndex = $(this).data("meal-index");
         let mealBlock = $(`.meal-block[data-index="${mealIndex}"]`);
@@ -207,7 +215,6 @@ $(function () {
         activateAutocomplete();
     });
 
-    // Премахване на хранене (маркиране за изтриване)
     $("#meals-container").on("click", ".remove-meal-btn", function () {
         let mealBlock = $(this).closest(".meal-block");
         let deleteInput = mealBlock.find('input[type=checkbox][name$="-DELETE"]');
@@ -216,13 +223,11 @@ $(function () {
             mealBlock.hide();
         } else {
             mealBlock.remove();
-            // актуализирай TOTAL_FORMS ако трябва
             let totalMealForms = $("#id_meals-TOTAL_FORMS");
             totalMealForms.val(parseInt(totalMealForms.val()) - 1);
         }
     });
 
-    // Премахване на продукт (маркиране за изтриване)
     $("#meals-container").on("click", ".remove-food-btn", function () {
         let foodItem = $(this).closest(".food-item");
         let deleteCheckbox = foodItem.find("input.delete-checkbox");
@@ -231,13 +236,124 @@ $(function () {
             foodItem.hide();
         } else {
             foodItem.remove();
-            // актуализирай TOTAL_FORMS ако трябва
-            // (Тук може да сложиш допълнителна логика)
         }
     });
 });
 </script>
 
+<style>
+h2, h3, h4, h5 {
+    color: #212529;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
 
-</body>
-</html>
+.meal-block {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 12px;
+    padding: 25px;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease-in-out;
+}
+
+.meal-block:hover {
+    transform: scale(1.01);
+}
+
+button[type="submit"],
+.add-food-btn,
+#add-meal-btn {
+    background: linear-gradient(90deg, #007bff, #0056b3);
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    font-size: 16px;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    margin-top: 20px;
+}
+
+button:hover,
+.add-food-btn:hover,
+#add-meal-btn:hover {
+    background: linear-gradient(90deg, #0056b3, #007bff);
+    transform: scale(1.04);
+}
+
+.remove-meal-btn,
+.remove-food-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 6px 10px;
+    font-size: 14px;
+    float: right;
+    margin-top: -10px;
+    margin-right: -10px;
+    transition: background 0.3s ease;
+}
+
+.remove-meal-btn:hover,
+.remove-food-btn:hover {
+    background-color: #bb2d3b;
+}
+
+.food-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: #f8f9fa;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 8px;
+    flex-wrap: wrap; /* за мобилни устройства */
+}
+
+.food-item > div {
+    flex: 1;
+    min-width: 150px;
+}
+
+.food-item .product-name-input,
+.food-item .product-id-input,
+.food-item input[type="number"] {
+    width: 100%;
+}
+
+.food-item label {
+    font-weight: 500;
+    display: block;
+}
+
+.food-item .remove-food-btn {
+    align-self: center;
+    height: 38px;
+    margin-top: 24px;
+}
+
+button[type="submit"] {
+    display: block;
+    width: auto;
+    margin: 30px auto 0 auto;
+}
+
+.add-food-btn {
+    margin-top: 10px;
+    background: #17a2b8;
+    border-radius: 25px;
+}
+
+.delete-checkbox {
+    display: none !important;
+}
+
+.add-food-btn:hover {
+    background: #138496;
+}
+
+</style>
+{% endblock %}

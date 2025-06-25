@@ -1,0 +1,12 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h2>{{ title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Запази</button>
+        <a href="{% url 'admin trainers list' %}" class="btn btn-secondary">Назад</a>
+    </form>
+</div>
+{% endblock %}

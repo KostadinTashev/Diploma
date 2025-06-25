@@ -4,24 +4,40 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <div class="container mt-5">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <a href="{% url 'dashboard' client.id client.user.username %}?start_date={{ start_date }}&end_date={{ end_date }}"
-               class="btn btn-outline-secondary btn-lg rounded-pill shadow-lg px-4 fw-bold">
-                <i class="bi bi-arrow-left-circle"></i> Назад
-            </a>
 
-            <h3 class="text-primary fw-bold text-center flex-grow-1 me-5">Прогрес на {{ client.user.full_name }}</h3>
+        <div class="position-relative mb-4 text-center">
+            {% if is_client_user %}
+                <a href="{% url 'dashboard' client.id client.user.username %}?start_date={{ start_date }}&end_date={{ end_date }}"
+                   class="btn btn-outline-secondary btn-lg rounded-pill shadow-lg px-4 fw-bold position-absolute start-0 top-0">
+                    <i class="bi bi-arrow-left-circle"></i> Назад
+                </a>
+            {% else %}
+                <a href="{% url 'client details' client.id client.user.username %}"
+                   class="btn btn-outline-secondary btn-lg rounded-pill shadow-lg px-4 fw-bold position-absolute start-0 top-0">
+                    <i class="bi bi-arrow-left-circle"></i> Назад
+                </a>
+            {% endif %}
+
+            <h3 class="text-primary fw-bold">
+                Прогрес на {{ client.user.get_full_name }}
+            </h3>
         </div>
 
-
-        <div class="text-center mb-3">
-            <a href="{% url 'add progress' client.pk %}" class="btn btn-primary">
-                Добави нов прогрес
-            </a>
+        <div class="text-center mt-4">
+            {% if is_client_user %}
+                <a href="{% url 'add progress' client.id %}" class="btn btn-success rounded-pill shadow-sm">
+                    <i class="bi bi-plus-circle"></i> Добави прогрес
+                </a>
+            {% else %}
+                <a href="{% url 'add progress' client.id %}" class="btn btn-outline-primary rounded-pill shadow-sm">
+                    <i class="bi bi-bar-chart"></i> Виж телесните измервания
+                </a>
+            {% endif %}
         </div>
 
-
-        <canvas id="progressChart"></canvas>
+        <div class="mt-5">
+            <canvas id="progressChart"></canvas>
+        </div>
     </div>
 
     <script>
@@ -55,6 +71,18 @@
                         fill: false
                     }
                 ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Проследяване на телесни параметри във времето'
+                    }
+                }
             }
         });
     </script>

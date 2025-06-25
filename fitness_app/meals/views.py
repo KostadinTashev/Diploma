@@ -1,6 +1,8 @@
 from collections import defaultdict
 from datetime import date
 import logging
+
+from django.contrib.auth.decorators import login_required
 from django.forms import formset_factory
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
@@ -120,19 +122,22 @@ def calorie_calculator(request):
     return render(request, 'meals/calorie_calculator.html', context)
 
 
+@login_required
 def meal_history(request, client_id=None):
+    is_trainer = False
+    trainer_id = None
+
     if client_id:
-        if not request.user.trainer:
+        if not hasattr(request.user, 'trainer'):
             return HttpResponseForbidden("Нямате достъп до тази страница.")
+        is_trainer = True
+        trainer_id = request.user.trainer.id
         client = get_object_or_404(Client, id=client_id)
     else:
         client = request.user.client
 
     selected_date_str = request.GET.get('date')
-    if selected_date_str:
-        selected_date = date.fromisoformat(selected_date_str)
-    else:
-        selected_date = date.today()
+    selected_date = date.fromisoformat(selected_date_str) if selected_date_str else date.today()
 
     meals = Meal.objects.filter(client=client, date=selected_date).prefetch_related('food_items__product')
 
@@ -141,22 +146,24 @@ def meal_history(request, client_id=None):
         key = (meal.meal, meal.date)
         grouped_meals[key].append(meal)
 
-    grouped_totals = {}
-    for key, meals_list in grouped_meals.items():
-        grouped_totals[key] = {
-            'calories': sum(m.calories for m in meals_list),
-            'carbs': sum(m.carbohydrate for m in meals_list),
-            'fats': sum(m.fats for m in meals_list),
-            'proteins': sum(m.proteins for m in meals_list),
+    grouped_totals = {
+        key: {
+            'calories': sum(m.calories for m in meal_list),
+            'carbs': sum(m.carbohydrate for m in meal_list),
+            'fats': sum(m.fats for m in meal_list),
+            'proteins': sum(m.proteins for m in meal_list),
         }
+        for key, meal_list in grouped_meals.items()
+    }
 
     return render(request, 'meals/meal_history.html', {
         'client': client,
         'grouped_meals': dict(grouped_meals),
         'grouped_totals': grouped_totals,
         'selected_date': selected_date.isoformat(),
+        'is_trainer': is_trainer,
+        'trainer_id': trainer_id,
     })
-
 
 def all_meals(request):
     meals = Meal.objects.all()

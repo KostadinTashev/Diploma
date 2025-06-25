@@ -1,0 +1,61 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+<div class="container mt-5">
+
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-person-circle"></i> Детайли за потребител: <strong>{{ user.username }}</strong>
+            </h4>
+        </div>
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <p><strong>Потребителско име:</strong> {{ user.username }}</p>
+                    <p><strong>Име:</strong> {{ user.first_name }}</p>
+                    <p><strong>Фамилия:</strong> {{ user.last_name }}</p>
+                    <p><strong>Email:</strong> {{ user.email }}</p>
+                    <p><strong>Дата на раждане:</strong> {{ user.birth_date|date:"d.m.Y" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Активен:</strong>
+                        {% if user.is_active %}
+                            <span class="badge bg-success">Да</span>
+                        {% else %}
+                            <span class="badge bg-danger">Не</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Пол:</strong> {{ user.gender }}</p>
+                    <p><strong>Роля:</strong>
+                        {% if user.is_superuser %}
+                            <span class="badge bg-danger">Администратор</span>
+                        {% elif user.is_trainer %}
+                            <span class="badge bg-success">Треньор</span>
+                        {% elif user.is_client %}
+                            <span class="badge bg-warning text-dark">Клиент</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Неопределен</span>
+                        {% endif %}
+                    </p>
+                    {% if user.profile_picture %}
+                        <p><strong>Профилна снимка:</strong></p>
+                        <img src="{{ user.profile_picture.url }}" alt="Снимка на {{ user.username }}"
+                             class="img-thumbnail" width="150">
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'admin users list' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left-circle"></i> Назад към списъка
+                </a>
+                <a href="{% url 'admin user edit' user.id %}" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Редактирай
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base/base-admin.html' %}
+
+{% block page_content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Отзиви от потребители</h2>
+
+    <div class="text-end mb-3">
+        {% if request.GET.pending %}
+            <a href="{% url 'admin reviews list' %}" class="btn btn-outline-primary">
+                <i class="bi bi-list"></i> Всички отзиви
+            </a>
+        {% else %}
+            <a href="?pending=true" class="btn btn-outline-warning">
+                <i class="bi bi-hourglass-split"></i> Само чакащи
+            </a>
+        {% endif %}
+    </div>
+
+    {% if reviews %}
+        <table class="table table-hover table-bordered">
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Клиент</th>
+                    <th>Оценка</th>
+                    <th>Коментар</th>
+                    <th>Дата</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for review in reviews %}
+                    <tr class="{% if not review.is_approved %}table-warning{% endif %}">
+                        <td class="text-center">{{ review.id }}</td>
+                        <td>{{ review.client.user.get_full_name }}</td>
+                        <td class="text-center">{{ review.rating }} ⭐</td>
+                        <td>{{ review.comment }}</td>
+                        <td class="text-center">{{ review.created_at|date:"d.m.Y H:i" }}</td>
+                        <td class="text-center">
+                            {% if review.is_approved %}
+                                <span class="badge bg-success">Одобрен</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Чакащ</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            {% if not review.is_approved %}
+                                <a href="{% url 'approve review' review.id %}" class="btn btn-sm btn-success me-2">
+                                    <i class="bi bi-check-circle"></i> Одобри
+                                </a>
+                                <a href="{% url 'reject review' review.id %}" class="btn btn-sm btn-danger">
+                                    <i class="bi bi-x-circle"></i> Откажи
+                                </a>
+                            {% else %}
+                                <em>--</em>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info text-center">
+            Няма налични отзиви за показване.
+        </div>
+    {% endif %}
+</div>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+{% endblock %}

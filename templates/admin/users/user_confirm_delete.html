@@ -1,0 +1,11 @@
+{% extends 'base/base.html' %}
+{% block page_content %}
+<div class="container mt-5">
+    <h3>Сигурни ли сте, че искате да изтриете потребителя <strong>{{ user.username }}</strong>?</h3>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Да, изтрий</button>
+        <a href="{% url 'admin users list' %}" class="btn btn-secondary">Отказ</a>
+    </form>
+</div>
+{% endblock %}

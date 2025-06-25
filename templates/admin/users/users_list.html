@@ -1,0 +1,74 @@
+{% extends 'base/base-admin.html' %}
+{% block page_content %}
+    <div class="container mt-5">
+        <h1 class="text-center text-primary fw-bold mb-4">{{ title }}</h1>
+
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{% url 'admin user create' %}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Добави потребител
+            </a>
+        </div>
+
+        <div class="table-responsive shadow-sm rounded-4">
+            <table class="table table-striped table-hover table-bordered align-middle">
+                <thead class="table-dark text-center">
+                <tr>
+                    <th>ID</th>
+                    <th>Потребителско име</th>
+                    <th>Имейл</th>
+                    <th>Роля</th>
+                    <th>Активен</th>
+                    <th>Действия</th>
+                </tr>
+                </thead>
+                <tbody class="text-center">
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>
+                            {% if user.is_superuser %}
+                                <span class="badge bg-danger">Администратор</span>
+                            {% elif user.is_trainer %}
+                                <span class="badge bg-success">Треньор</span>
+                            {% elif user.is_client %}
+                                <span class="badge bg-warning text-dark">Клиент</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Неопределен</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if user.is_active %}
+                                <span class="text-success fw-semibold">Да</span>
+                            {% else %}
+                                <span class="text-danger fw-semibold">Не</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'admin user details' user.id %}" class="btn btn-sm btn-outline-primary">Детайли</a>
+                            <a href="{% url 'admin user edit' user.id %}" class="btn btn-sm btn-outline-warning">Редактирай</a>
+
+                            {% if user.id != request.user.id %}
+                                <form method="post" action="{% url 'admin user toggle' user.id %}"
+                                      style="display:inline-block;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary">
+                                        {% if user.is_active %}Деактивирай{% else %}Активирай{% endif %}
+                                    </button>
+                                </form>
+
+                            {% endif %}
+
+                            {% if not user.is_superuser and not user.is_trainer %}
+                                <a href="{% url 'admin user delete' user.id %}" class="btn btn-sm btn-outline-danger">Изтрий</a>
+                            {% endif %}
+
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

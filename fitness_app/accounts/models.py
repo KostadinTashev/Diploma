@@ -29,7 +29,6 @@ class FitnessUser(auth_models.AbstractUser):
             validate_only_alphabetical,
         ),
         verbose_name='Първо име'
-
     )
     last_name = models.CharField(
         max_length=MAX_LAST_NAME_LENGTH,
@@ -70,3 +69,11 @@ class FitnessUser(auth_models.AbstractUser):
         if self.first_name or self.last_name:
             return f"{self.first_name} {self.last_name}"
         return None
+
+    @property
+    def is_trainer(self):
+        return hasattr(self, 'trainer')
+
+    @property
+    def is_client(self):
+        return hasattr(self, 'client')

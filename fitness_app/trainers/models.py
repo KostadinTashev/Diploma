@@ -1,17 +1,18 @@
 from enum import Enum
 from django.db import models
 from django.core.validators import MinLengthValidator
-from django.conf import settings
 
 from fitness_app.utils.mixins import ChoicesStringsMixin
 
 
 class SpecialityType(str, ChoicesStringsMixin, Enum):
-    СИЛОВА = "Силова тренировка"
-    АЕРОБИКА = "Аеробика"
-    ЙОГА = "Йога"
-    КРОСФИТ = "Кросфит"
-    ДРУГО = "Друго"
+    Силов = "Силов треньор"
+    Функционален = "Функционален треньор"
+    Аеробика = "Аеробика инструктор"
+    Кардио = "Кардио инструктор"
+    Йога = "Йога инструктор"
+    Пилатес = "Пилатес инструктор"
+    Кросфит = "Кросфит треньор"
 
 
 class Trainer(models.Model):
@@ -57,6 +58,7 @@ class Trainer(models.Model):
         unique=True,
         verbose_name='Телефонен номер',
     )
+    pending_requests = {}
 
     class Meta:
         verbose_name = "Треньор"
@@ -64,3 +66,6 @@ class Trainer(models.Model):
 
     def __str__(self):
         return f"Треньор: {self.user.full_name or self.user.username}"
+
+
+
