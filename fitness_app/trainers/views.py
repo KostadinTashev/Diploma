@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction, IntegrityError
 from django.db.models import Avg, Count
 from django.http import Http404
 from django.shortcuts import render, get_object_or_404, redirect
@@ -11,15 +12,37 @@ from fitness_app.clients.models import Client, ClientGoals, TrainerReview
 from fitness_app.program_exercises.models import ProgramExercise
 from fitness_app.progress.models import Progress
 from fitness_app.trainers.forms import UserForm, TrainerForm
-from fitness_app.trainers.models import Trainer
+from fitness_app.trainers.models import Trainer, SpecialityType
 
 GOALS_TO_SPECIALTIES = {
-    ClientGoals.ОТСЛАБВАНЕ: ["Аеробика", 'Кардио', "Кросфит"],
-    ClientGoals.МУСКУЛНА_МАСА: ["Силов", "Кросфит"],
-    ClientGoals.СТЯГАНЕ: ["Пилатес", "Функционален", 'Аеробика'],
-    ClientGoals.ИЗДРЪЖЛИВОСТ: ["Кардио", 'Функционален', "Кросфит"],
-    ClientGoals.СИЛА: ["Силов", "Кросфит"],
-    ClientGoals.ПОДДЪРЖАНЕ_НА_ТЕГЛО: ["Йога", 'Пилатес' "Аеробика"],
+    ClientGoals.ОТСЛАБВАНЕ: [
+        SpecialityType.Аеробика,
+        SpecialityType.Кардио,
+        SpecialityType.Кросфит
+    ],
+    ClientGoals.МУСКУЛНА_МАСА: [
+        SpecialityType.Силов,
+        SpecialityType.Кросфит
+    ],
+    ClientGoals.СТЯГАНЕ: [
+        SpecialityType.Пилатес,
+        SpecialityType.Функционален,
+        SpecialityType.Аеробика
+    ],
+    ClientGoals.ИЗДРЪЖЛИВОСТ: [
+        SpecialityType.Кардио,
+        SpecialityType.Функционален,
+        SpecialityType.Кросфит
+    ],
+    ClientGoals.СИЛА: [
+        SpecialityType.Силов,
+        SpecialityType.Кросфит
+    ],
+    ClientGoals.ПОДДЪРЖАНЕ_НА_ТЕГЛО: [
+        SpecialityType.Йога,
+        SpecialityType.Пилатес,
+        SpecialityType.Аеробика
+    ],
 }
 
 
@@ -32,17 +55,20 @@ class AllTrainersView(ListView):
 @login_required
 def suitable_trainers(request):
     client = get_object_or_404(Client, user=request.user)
-    specialties = GOALS_TO_SPECIALTIES.get(client.goals, [])
+    goal = client.goals
+    specialties_enum = GOALS_TO_SPECIALTIES.get(goal, [])
+    specialty_values = [s.value for s in specialties_enum]
+
     trainers = (
         Trainer.objects
-        .filter(speciality__in=specialties)
+        .filter(speciality__in=specialty_values)
         .annotate(client_count=Count('client'))
         .filter(client_count__lt=10)
     )
 
     return render(request, 'trainers/suitable-trainers.html', {
         'suitable_trainers': trainers,
-        'goal': client.goals
+        'goal': goal
     })
 
 
@@ -71,19 +97,19 @@ def trainer_pending_requests(request):
 @login_required
 def send_trainer_request(request, trainer_id):
     client = get_object_or_404(Client, user=request.user)
-    trainer = get_object_or_404(Trainer, id=trainer_id)
+    trainer = get_object_or_404(Trainer, pk=trainer_id)
 
-    client_count = Client.objects.filter(trainer=trainer).count()
-    if client_count >= 10:
-        messages.error(request, "Този треньор вече е достигнал лимита от 10 клиента и не приема нови заявки.")
-        return redirect('all trainers')
-
-    existing = TrainerRequest.objects.filter(client=client, trainer=trainer, is_approved=False).first()
-    if existing:
-        messages.info(request, "Вече сте изпратили заявка към този треньор.")
+    try:
+        with transaction.atomic():
+            TrainerRequest.objects.create(client=client, trainer=trainer)
+    except IntegrityError:
+        with transaction.atomic():
+            TrainerRequest.objects.filter(client=client, is_approved=False).delete()
+            TrainerRequest.objects.create(client=client, trainer=trainer)
+        messages.info(request, "Старата чакаща заявка беше заменена с нова.")
     else:
-        TrainerRequest.objects.create(client=client, trainer=trainer)
-        messages.success(request, "Заявката беше изпратена успешно.")
+        messages.success(request, "Заявката беше изпратена успешно!")
+
 
     return redirect('dashboard', client_id=client.id, username=request.user.username)
 

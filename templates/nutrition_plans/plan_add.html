@@ -50,7 +50,25 @@
                 <div class="meal-block" data-index="{{ forloop.counter0 }}">
                     <button type="button" class="remove-meal-btn btn btn-danger btn-sm float-end">🗑</button>
                     <h4>Хранене {{ forloop.counter }}</h4>
-                    {{ meal_form.as_p }}
+                    <div class="row g-3">
+    <div class="col-md-4">
+       {{ meal_form.meal.label_tag }} {{ meal_form.meal }}
+</div>
+<div class="form-group">
+    {{ meal_form.date.label_tag }} {{ meal_form.date }}
+</div>
+<div class="form-group">
+    {{ meal_form.description.label_tag }} {{ meal_form.description }}
+</div>
+
+{% if meal_form.id %}
+    {{ meal_form.id }}
+{% endif %}
+
+{% if meal_form.DELETE %}
+    {{ meal_form.DELETE|add_class:"delete-checkbox" }}
+{% endif %}
+</div>
 
                     {% with food_formset=food_formsets|index:forloop.counter0 %}
                         {{ food_formset.management_form }}
@@ -83,9 +101,23 @@
         <div class="meal-block" data-index="__prefix__">
             <button type="button" class="remove-meal-btn btn btn-danger btn-sm float-end">🗑</button>
             <h4>Хранене __number__</h4>
-            {{ empty_meal_form.as_p|safe }}
+             <div class="form-group">
+            {{ empty_meal_form.meal.label_tag }} {{ empty_meal_form.meal }}
+        </div>
+        <div class="form-group">
+            {{ empty_meal_form.date.label_tag }} {{ empty_meal_form.date }}
+        </div>
+        <div class="form-group">
+            {{ empty_meal_form.description.label_tag }} {{ empty_meal_form.description }}
+        </div>
 
-            {{ empty_food_formset.management_form|safe }}
+        {{ empty_meal_form.id }}
+
+        {% if empty_meal_form.DELETE %}
+            {{ empty_meal_form.DELETE|add_class:"delete-checkbox" }}
+        {% endif %}
+
+        {{ empty_food_formset.management_form|safe }}
             <h5>Продукти:</h5>
             <div class="food-items-container">
                 {% for form in empty_food_formset %}

@@ -1,0 +1,16 @@
+{% extends 'base/base-admin.html' %}
+{% block title %}Детайли назначение{% endblock %}
+{% block page_content %}
+<h3>Детайли за назначението</h3>
+<ul class="list-group mb-3">
+  <li class="list-group-item"><strong>Клиент:</strong>
+      {{ program.client.user.get_full_name|default:program.client.user.username }}</li>
+  <li class="list-group-item"><strong>Тренировка:</strong>
+      {{ program.workout.program_name }}</li>
+  <li class="list-group-item"><strong>Дата:</strong> {{ program.date }}</li>
+</ul>
+
+<a href="{% url 'admin program edit' program.pk %}" class="btn btn-outline-primary">Редакция</a>
+<a href="{% url 'admin program delete' program.pk %}" class="btn btn-outline-danger">Изтриване</a>
+<a href="{% url 'admin program list' %}" class="btn btn-secondary">Назад</a>
+{% endblock %}

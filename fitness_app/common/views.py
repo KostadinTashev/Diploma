@@ -19,8 +19,8 @@ def index(request, pk=None, trainer_name=None):
         email_message = EmailMessage(
             subject='Ново съобщение от контактната форма на Сила+',
             body=f'Име: {name}\nИмейл: {email}\n\nСъобщение:\n{message}',
-            from_email='k.tashev02@gmail.com',
-            to=['k.tashev02@gmail.com'],
+            from_email='silaapluss@gmail.com',
+            to=['silaapluss@gmail.com'],
             reply_to=[email],
         )
         email_message.send(fail_silently=False)

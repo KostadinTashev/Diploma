@@ -1,6 +1,7 @@
 from enum import Enum
 
 from django.db import models
+from django.db.models import Q
 
 from fitness_app.utils.mixins import ChoicesStringsMixin
 from fitness_app.trainers.models import Trainer
@@ -72,3 +73,13 @@ class TrainerRequest(models.Model):
     trainer = models.ForeignKey('trainers.Trainer', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     is_approved = models.BooleanField(default=False)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['client'],
+                condition=Q(is_approved=False),
+                name='unique_pending_request_per_client',
+            )
+        ]
+        ordering = ['-created_at']

@@ -1,0 +1,21 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Страницата не е намерена – 404{% endblock %}
+
+{% block page_content %}
+    <div class="d-flex flex-column justify-content-center align-items-center"
+         style="min-height: 70vh; text-align: center;">
+
+        <h1 class="display-3 fw-bold text-primary">404</h1>
+        <h2 class="mb-3">Упс! Страницата не е намерена.</h2>
+        <p class="lead mb-4">
+            Възможно е връзката да е счупена или страницата да е премахната.<br>
+            Моля, върнете се на началната страница или използвайте менюто.
+        </p>
+
+        <a href="{% url 'index' %}" class="btn btn-primary px-4 py-2">
+            Начало
+        </a>
+    </div>
+{% endblock %}

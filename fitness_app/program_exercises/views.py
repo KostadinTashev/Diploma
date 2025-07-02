@@ -36,19 +36,18 @@ def assign_program_view(request, client_id):
 def edit_program(request, client_id):
     client = get_object_or_404(Client, pk=client_id)
     trainer = client.trainer
-    today = now().date()
+    # today = now().date()
 
-    future_workouts = ProgramExercise.objects.filter(
-        client=client,
-        date__gte=today
-    ).order_by('date')
+    # future_workouts = ProgramExercise.objects.filter(
+    #     client=client,
+    #     date__gte=today
+    # ).order_by('date')
 
     if request.method == 'POST':
-        print(request.POST)
         formset = ProgramExerciseFormEditSet(
             request.POST,
             instance=client,
-            queryset=future_workouts
+            # queryset=future_workouts
         )
         if formset.is_valid():
             formset.save()
@@ -57,7 +56,7 @@ def edit_program(request, client_id):
     else:
         formset = ProgramExerciseFormEditSet(
             instance=client,
-            queryset=future_workouts
+            # queryset=future_workouts
         )
 
     return render(request, 'program_exercises/edit_program.html', {
@@ -110,23 +109,18 @@ def programs_for_date(request, client_id, date):
 def client_program_view(request, client_id):
     client = get_object_or_404(Client, pk=client_id)
 
-    # Избиране на дата от заявката или днешна по подразбиране
     selected_date_str = request.GET.get('date')
     selected_date = parse_date(selected_date_str) if selected_date_str else timezone.localdate()
 
-    # Взимаме програмите на клиента за конкретната дата
     program_entries = ProgramExercise.objects.filter(
         client=client,
         date=selected_date
     ).select_related('workout')
 
-    # Взимаме всички тренировки от тези програми
     workouts = [entry.workout for entry in program_entries]
 
-    # Взимаме всички упражнения (WorkoutExercise), свързани с тези тренировки
     exercises = WorkoutExercise.objects.filter(workout__in=workouts).select_related('exercise')
 
-    # Взимаме изпълнените упражнения за тази дата и клиент
     completed_exercise_ids = CompletedExercise.objects.filter(
         client=client,
         workout_exercise__in=exercises,

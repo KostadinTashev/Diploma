@@ -1,4 +1,4 @@
-{% extends 'base/base.html' %}
+{% extends 'base/base-admin.html' %}
 {% block page_content %}
     {% load form_tags %}
     {% load static %}
@@ -103,7 +103,7 @@
                     </template>
 
                     <div class="d-flex justify-content-between mt-4">
-                        <a href="{% url 'workout list' %}" class="btn btn-secondary">Назад</a>
+                        <a href="{% url 'admin workouts list' %}" class="btn btn-secondary">Назад</a>
                         <div>
                             <button type="button" class="btn btn-outline-secondary me-2" onclick="addForm()">Добави
                                 упражнение

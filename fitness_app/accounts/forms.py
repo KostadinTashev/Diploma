@@ -1,11 +1,15 @@
 from django import forms
 from django.contrib.auth import forms as auth_forms, get_user_model
 from django.contrib.auth.forms import AuthenticationForm, UserChangeForm, UserCreationForm
+from django.db import transaction
+from django.forms import inlineformset_factory
 
 from fitness_app.accounts.models import FitnessUser
 from fitness_app.clients.models import Client
-from fitness_app.meals.models import Meal
-from fitness_app.trainers.models import Trainer
+from fitness_app.meals.models import Meal, Product
+from fitness_app.program_exercises.models import ProgramExercise
+from fitness_app.trainers.models import Trainer, SpecialityType
+from fitness_app.workouts.models import Workout, WorkoutExercise
 
 UserModel = get_user_model()
 
@@ -75,6 +79,7 @@ class CustomUserCreationForm(UserCreationForm):
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
 
+
 class CustomUserEditForm(forms.ModelForm):
     password1 = forms.CharField(
         label="Нова парола",
@@ -118,43 +123,58 @@ class CustomUserEditForm(forms.ModelForm):
             user.save()
         return user
 
-class TrainerForm(forms.ModelForm):
-    user = forms.ModelChoiceField(
-        queryset=FitnessUser.objects.exclude(
-            id__in=Trainer.objects.values_list('user_id', flat=True)
-        ).exclude(
-            id__in=Client.objects.values_list('user_id', flat=True)
-        ),
-        label="Потребител",
-        widget=forms.Select(attrs={'class': 'form-select'}),
+
+class TrainerForm(CustomUserCreationForm):
+    speciality = forms.ChoiceField(
+        choices=SpecialityType.choices(),
+        label="Специалност",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    years_of_experience = forms.IntegerField(
+        label="Години опит",
+        min_value=0,
+        widget=forms.NumberInput(attrs={"class": "form-control"}),
+    )
+    certifications = forms.CharField(
+        label="Сертификати",
+        required=False,
+    )
+    bio = forms.CharField(
+        label="Биография",
+        required=False,
+        widget=forms.Textarea(attrs={"rows": 3, "class": "form-control"}),
+    )
+    phone_number = forms.CharField(
+        label="Телефонен номер",
+        required=False,
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
 
-    class Meta:
-        model = Trainer
-        fields = [
-            'user',
-            'speciality',
-            'years_of_experience',
-            'certifications',
-            'bio',
-            'phone_number',
+    class Meta(CustomUserCreationForm.Meta):
+        model = CustomUserCreationForm.Meta.model
+        fields = CustomUserCreationForm.Meta.fields + [
+            "speciality",
+            "years_of_experience",
+            "certifications",
+            "bio",
+            "phone_number",
+            'profile_picture',
         ]
 
-        labels = {
-            'speciality': 'Специалност',
-            'years_of_experience': 'Години опит',
-            'certifications': 'Сертификати',
-            'bio': 'Биография',
-            'phone_number': 'Телефонен номер',
-        }
+    @transaction.atomic
+    def save(self, commit=True):
+        user = super().save(commit=True)
 
-        widgets = {
-            'speciality': forms.Select(attrs={'class': 'form-select'}),
-            'years_of_experience': forms.NumberInput(attrs={'class': 'form-control'}),
-            'certifications': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'bio': forms.Textarea(attrs={'rows': 3, 'class': 'form-control'}),
-            'phone_number': forms.TextInput(attrs={'class': 'form-control'}),
-        }
+        Trainer.objects.create(
+            user=user,
+            speciality=self.cleaned_data["speciality"],
+            years_of_experience=self.cleaned_data["years_of_experience"],
+            certifications=self.cleaned_data["certifications"],
+            bio=self.cleaned_data["bio"],
+            phone_number=self.cleaned_data["phone_number"],
+        )
+
+        return user
 
     # def __init__(self, *args, **kwargs):
     #     super().__init__(*args, **kwargs)
@@ -223,3 +243,41 @@ class MealAdminForm(forms.ModelForm):
             'fats': 'Мазнини',
             'proteins': 'Протеини',
         }
+
+
+class WorkoutAdminForm(forms.ModelForm):
+    class Meta:
+        model  = Workout
+        fields = ("program_name", "category", "description")
+
+WorkoutExerciseFormAdminSet = inlineformset_factory(
+    Workout,
+    WorkoutExercise,
+    fields=("exercise", "series", "repetitions", "rest_time"),
+    extra=1,
+    can_delete=True,
+)
+
+class ProgramExerciseAdminForm(forms.ModelForm):
+    """Единична форма за CRUD (admin)."""
+    class Meta:
+        model = ProgramExercise
+        fields = ("client", "workout", "date")
+        widgets = {
+            "client":  forms.Select(attrs={"class": "form-select"}),
+            "workout": forms.Select(attrs={"class": "form-select"}),
+            "date":    forms.DateInput(attrs={"type": "date",
+                                              "class": "form-control"}),
+        }
+        labels = {
+            "client":  "Клиент",
+            "workout": "Тренировка",
+            "date":    "Дата",
+        }
+
+from django import forms
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model  = Product
+        fields = ['name', 'calories_per_100g', 'carbohydrates_per_100g',
+                  'fats_per_100g', 'proteins_per_100g', 'serving_size']

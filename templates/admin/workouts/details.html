@@ -1,0 +1,86 @@
+{% extends 'base/base-admin.html' %}
+{% block title %}Детайли – {{ workout.program_name }}{% endblock %}
+
+{% block page_content %}
+    <div class="container-lg mt-4">
+        <h5 class="fw-semibold mt-4">Клиенти, които изпълняват тази тренировка</h5>
+        <ul class="list-group mb-4">
+            {% for client in assigned_clients %}
+                <li class="list-group-item">
+                    <a href="{% url 'admin client details' client.id %}">
+                        {{ client.user.get_full_name|default:client.user.username }}
+                    </a>
+                </li>
+            {% empty %}
+                <li class="list-group-item text-muted">Няма назначени клиенти.</li>
+            {% endfor %}
+        </ul>
+        <div class="card shadow-sm">
+            <div class="card-body">
+
+                <h2 class="card-title mb-4">Детайли за тренировка</h2>
+
+                <ul class="list-group mb-4">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Име:</strong>
+                        <span>{{ workout.program_name }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <strong>Категория:</strong>
+                        <span>{{ workout.get_category_display }}</span>
+                    </li>
+                    {% if workout.description %}
+                        <li class="list-group-item">
+                            <strong>Описание:</strong>
+                            <p class="mb-0 mt-2">{{ workout.description|linebreaks }}</p>
+                        </li>
+                    {% endif %}
+                </ul>
+
+                <h5 class="mb-3">Упражнения в програмата</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered align-middle">
+                        <thead class="table-light">
+                        <tr>
+                            <th>Упражнение</th>
+                            <th class="text-center">Серии</th>
+                            <th class="text-center">Повторения</th>
+                            <th class="text-center">Почивка (сек.)</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for we in workout.exercises.all %}
+                            <tr>
+                                <td>{{ we.exercise.name }}</td>
+                                <td class="text-center">{{ we.series }}</td>
+                                <td class="text-center">{{ we.repetitions }}</td>
+                                <td class="text-center">{{ we.rest_time|default:"–" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    Няма добавени упражнения.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <a href="{% url 'admin workout edit' workout.id %}" class="btn btn-outline-primary">
+                        <i class="bi bi-pencil-square me-1"></i> Редакция
+                    </a>
+                    <a href="{% url 'admin workout delete' workout.id %}" class="btn btn-outline-danger">
+                        <i class="bi bi-trash me-1"></i> Изтриване
+                    </a>
+                    <a href="{% url 'admin workouts list' %}" class="btn btn-secondary ms-auto">
+                        Назад
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+{% endblock %}

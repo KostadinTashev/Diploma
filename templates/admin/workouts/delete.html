@@ -1,0 +1,37 @@
+{% extends 'base/base-admin.html' %}
+{% block title %}Изтриване – {{ workout.program_name }}{% endblock %}
+
+{% block page_content %}
+<div class="container-lg mt-4">
+
+    <div class="card shadow-sm border-danger">
+        <div class="card-body">
+
+            <h2 class="card-title text-danger mb-3">
+                Изтриване на тренировка
+            </h2>
+
+            <div class="alert alert-warning mb-4">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                На път сте да изтриете тренировката
+                <strong>{{ workout.program_name }}</strong>.
+                Това ще премахне и всички връзки към нея.<br>
+                <strong>Сигурни ли сте?</strong>
+            </div>
+
+            <form method="post" class="d-flex gap-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash me-1"></i> Да, изтрий
+                </button>
+                <a href="{% url 'admin workout details' workout.id %}"
+                   class="btn btn-secondary ms-auto">
+                    Отказ
+                </a>
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

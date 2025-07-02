@@ -1,0 +1,14 @@
+{% extends 'base/base-admin.html' %}
+{% block title %}Изтриване назначение{% endblock %}
+{% block page_content %}
+<div class="alert alert-warning">
+  Сигурни ли сте, че искате да изтриете назначението на
+  <strong>{{ program.client.user.get_full_name|default:program.client.user.username }}</strong>
+  за <em>{{ program.workout.program_name }}</em> ({{ program.date }})?
+</div>
+<form method="post">
+  {% csrf_token %}
+  <button class="btn btn-danger">Да, изтрий</button>
+  <a href="{% url 'admin program details' program.pk %}" class="btn btn-secondary">Отказ</a>
+</form>
+{% endblock %}
