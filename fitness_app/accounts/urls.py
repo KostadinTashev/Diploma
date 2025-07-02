@@ -69,23 +69,23 @@ path('admin/workouts/<int:workout_id>/delete/',admin_workout_delete,  name='admi
     path("admin/programs/<int:pk>/", admin_program_details, name="admin program details"),
     path("admin/programs/<int:pk>/edit/", admin_program_edit, name="admin program edit"),
     path("admin/programs/<int:pk>/delete/", admin_program_delete, name="admin program delete"),
-    path("admin/products/", admin_products_list, name="admin products list"),
-    path("admin/products/add/", admin_product_create, name="admin product add"),
-    path("admin/products/<int:pk>/", admin_product_details, name="admin product detail"),
-    path("admin/products/<int:pk>/edit/", admin_product_edit, name="admin product edit"),
-    path("admin/products/<int:pk>/delete/", admin_product_delete, name="admin product delete"),
-
-    # Meals
-    path("admin/meals/", admin_meals_list, name="admin meals list"),
-    path("admin/meals/create/", admin_meal_create, name="admin meal create"),
-    path("admin/meals/<int:meal_id>/", admin_meal_details, name="admin meal details"),
-    path("admin/meals/<int:meal_id>/edit/", admin_meal_edit, name="admin meal edit"),
-    path("admin/meals/<int:meal_id>/delete/", admin_meal_delete, name="admin meal delete"),
-
-    # Nutrition Plans
-    path("admin/plans/", admin_plans_list, name="admin plans list"),
-    path("admin/plans/add/", admin_plan_create, name="admin plan add"),
-    path("admin/plans/<int:pk>/", admin_plan_details, name="admin plan detail"),
-    path("admin/plans/<int:pk>/edit/", admin_plan_edit, name="admin plan edit"),
-    path("admin/plans/<int:pk>/delete/", admin_plan_delete, name="admin plan delete"),
+    # path("admin/products/", admin_products_list, name="admin products list"),
+    # path("admin/products/add/", admin_product_create, name="admin product add"),
+    # path("admin/products/<int:pk>/", admin_product_details, name="admin product detail"),
+    # path("admin/products/<int:pk>/edit/", admin_product_edit, name="admin product edit"),
+    # path("admin/products/<int:pk>/delete/", admin_product_delete, name="admin product delete"),
+    #
+    # # Meals
+    # path("admin/meals/", admin_meals_list, name="admin meals list"),
+    # path("admin/meals/create/", admin_meal_create, name="admin meal create"),
+    # path("admin/meals/<int:meal_id>/", admin_meal_details, name="admin meal details"),
+    # path("admin/meals/<int:meal_id>/edit/", admin_meal_edit, name="admin meal edit"),
+    # path("admin/meals/<int:meal_id>/delete/", admin_meal_delete, name="admin meal delete"),
+    #
+    # # Nutrition Plans
+    # path("admin/plans/", admin_plans_list, name="admin plans list"),
+    # path("admin/plans/add/", admin_plan_create, name="admin plan add"),
+    # path("admin/plans/<int:pk>/", admin_plan_details, name="admin plan detail"),
+    # path("admin/plans/<int:pk>/edit/", admin_plan_edit, name="admin plan edit"),
+    # path("admin/plans/<int:pk>/delete/", admin_plan_delete, name="admin plan delete"),
 ]
