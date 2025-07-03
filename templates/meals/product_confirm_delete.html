@@ -1,0 +1,13 @@
+{% extends "base/base.html" %}
+{% block page_content %}
+    <div class="container py-4" style="max-width: 600px;">
+        <h2 class="text-danger">Потвърждение за изтриване</h2>
+        <p>Сигурни ли сте, че искате да изтриете продукта <strong>{{ product.name }}</strong>?</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button class="btn btn-danger"><i class="bi bi-trash"></i> Изтрий</button>
+            <a href="{% url 'product detail' product.pk %}" class="btn btn-secondary">Отказ</a>
+        </form>
+    </div>
+{% endblock %}

@@ -113,14 +113,11 @@ class FoodItemEditForm(forms.ModelForm):
         product_name = cleaned_data.get('product_name')
 
         if product and product_name:
-            # ако потребителят е променил името, а ID-то си остава — това е несъответствие
             if product.name.strip().lower() != product_name.strip().lower():
-                # създаваме/взимаме нов продукт
                 product_obj, _ = Product.objects.get_or_create(name=product_name.strip())
                 cleaned_data['product'] = product_obj
 
         elif product_name and not product:
-            # autocomplete не е избран, но име има
             product_obj, _ = Product.objects.get_or_create(name=product_name.strip())
             cleaned_data['product'] = product_obj
 
@@ -128,7 +125,6 @@ class FoodItemEditForm(forms.ModelForm):
             self.add_error('product_name', 'Моля, изберете или въведете валиден продукт.')
 
         return cleaned_data
-
 
 
 MealFormEditSet = inlineformset_factory(

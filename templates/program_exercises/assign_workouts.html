@@ -6,7 +6,6 @@
     <div class="card shadow">
         <div class="card-body">
 
-            {# ─── Заглавие + бутон Назад ─── #}
             <div class="d-flex align-items-center mb-4 flex-wrap gap-2">
                 <a href="{% url 'client_program' client.id %}"
                    class="btn btn-secondary px-4 py-2">
@@ -22,7 +21,6 @@
                 {% csrf_token %}
                 {{ formset.management_form }}
 
-                {# ─── Списък с формове ─── #}
                 <div id="formset-container">
                     {% for form in formset %}
                         <div class="row mb-3 border p-3 bg-light rounded program-form position-relative">
@@ -45,7 +43,6 @@
                     {% endfor %}
                 </div>
 
-                {# ─── Долни бутони ─── #}
                 <div class="d-flex justify-content-between gap-3 flex-wrap mt-4">
                     <button type="button"
                             id="add-form-btn"

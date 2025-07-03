@@ -13,6 +13,7 @@ from fitness_app.exercises.forms import ExerciseAddForm, ExerciseEditForm
 from fitness_app.exercises.models import Exercise, CompletedExercise
 from fitness_app.workouts.models import WorkoutExercise
 
+
 # @csrf_exempt
 # def exercises_api(request):
 #     if request.method == 'GET':
@@ -51,43 +52,36 @@ def exercises(request):
 
 @login_required
 def complete_exercise(request, pk):
-    if request.method == 'POST':
-        client = getattr(request.user, 'client', None)
-        if not client:
-            return JsonResponse({'error': 'Нямате клиентски профил.'}, status=400)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
 
-        workout_exercise = get_object_or_404(WorkoutExercise, pk=pk)
-        date_str = request.POST.get('date')
-        date = parse_date(date_str) or timezone.localdate()
+    client = getattr(request.user, 'client', None)
+    if not client:
+        return JsonResponse({'error': 'Нямате клиентски профил.'}, status=400)
 
-        CompletedExercise.objects.get_or_create(
-            client=client,
-            workout_exercise=workout_exercise,
-            date=date
-        )
-        return JsonResponse({'success': True})
+    workout_exercise = get_object_or_404(WorkoutExercise, pk=pk)
 
-    return JsonResponse({'error': 'Invalid method'}, status=405)
+    CompletedExercise.objects.get_or_create(
+        client=client,
+        workout_exercise=workout_exercise,
+    )
+    return JsonResponse({'success': True})
 
 
 @login_required
 def uncomplete_exercise(request, pk):
-    if request.method == 'POST':
-        client = getattr(request.user, 'client', None)
-        if not client:
-            return JsonResponse({'error': 'Нямате клиентски профил.'}, status=400)
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Invalid method'}, status=405)
 
-        date_str = request.POST.get('date')
-        date = parse_date(date_str) or timezone.localdate()
+    client = getattr(request.user, 'client', None)
+    if not client:
+        return JsonResponse({'error': 'Нямате клиентски профил.'}, status=400)
 
-        CompletedExercise.objects.filter(
-            client=client,
-            workout_exercise_id=pk,
-            date=date
-        ).delete()
-        return JsonResponse({'success': True})
-
-    return JsonResponse({'error': 'Invalid method'}, status=405)
+    CompletedExercise.objects.filter(
+        client=client,
+        workout_exercise_id=pk,
+    ).delete()
+    return JsonResponse({'success': True})
 
 
 def exercise_add(request):

@@ -1,0 +1,64 @@
+{% extends "base/base.html" %}
+
+{% block page_content %}
+    <div class="container py-4" style="max-width: 720px;">
+
+        <div class="d-flex align-items-center mb-3">
+            <a href="{% url 'product list' %}" class="btn btn-secondary me-3">
+                <i class="bi bi-arrow-left-circle"></i> Назад
+            </a>
+            <h2 class="mb-0">{{ product.name }}</h2>
+        </div>
+
+        <p class="text-muted fst-italic">
+            * Калориите и макронутриентите са посочени за 100&nbsp;гр продукт.
+        </p>
+
+        <table class="table table-bordered">
+            <tbody>
+            <tr>
+                <th>Калории (ккал)</th>
+                <td>{{ product.calories_per_100g|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Протеини&nbsp;(гр)</th>
+                <td>{{ product.proteins_per_100g|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Въглехидрати&nbsp;(гр)</th>
+                <td>{{ product.carbohydrates_per_100g|default:"-" }}</td>
+            </tr>
+            <tr>
+                <th>Мазнини&nbsp;(гр)</th>
+                <td>{{ product.fats_per_100g|default:"-" }}</td>
+            </tr>
+            </tbody>
+        </table>
+
+        {% if can_manage %}
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'product update' product.pk %}"
+                   class="btn btn-primary btn-action">
+                    <i class="bi bi-pencil-square"></i> Редакция
+                </a>
+
+                <a href="{% url 'product delete' product.pk %}"
+                   class="btn btn-danger btn-action">
+                    <i class="bi bi-trash"></i> Изтриване
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+    <style>
+  .btn-action {
+      padding: .6rem 1.4rem;
+      font-size: 1rem;
+      border-radius: .5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: .5rem;
+  }
+</style>
+{% endblock %}
+

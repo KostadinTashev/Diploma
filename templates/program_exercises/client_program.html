@@ -25,7 +25,6 @@
     <div class="container py-4">
         <div class="shadow-box">
 
-            <!-- заглавен бар -->
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <a href="{% url 'trainer clients' trainer_id=trainer_id %}"
                    class="btn btn-outline-secondary rounded-pill shadow-sm">
@@ -73,17 +72,14 @@
                         <tbody>
                         {% for workout in workouts %}
                             <tr class="text-center align-middle">
-                                <!-- 1) дата -->
                                 <td class="fw-semibold fs-6 p-3 bg-light rounded">
                                     {{ workout.date|date:"d.m.Y" }}
                                 </td>
 
-                                <!-- 2) име на програмата -->
                                 <td class="fs-5 text-uppercase text-primary fw-bold p-2">
                                     {{ workout.workout.program_name }}
                                 </td>
 
-                                <!-- 3) списък с упражненията за този workout -->
                                 <td>
                                     <ul class="list-unstyled mb-0">
                                         {% for exercise in workout.workout.exercises.all %}

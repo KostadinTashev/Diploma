@@ -3,11 +3,11 @@ import requests
 from bs4 import BeautifulSoup
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from fitness_app.meals.models import Product  # ⇦ коригирай ако пътят е различен
+from fitness_app.meals.models import Product
 
 # ──────────────────────────────────────────────────────────────────────────────
 GROUPS_URL = "https://www.bb-team.org/hrani"
-GROUP_LINK_RE = re.compile(r"^/hrani/[^/]+$")  # /hrani/агнешки-продукти …
+GROUP_LINK_RE = re.compile(r"^/hrani/[^/]+$")
 
 CYRILLIC_NAME_RE = re.compile(r"^[\u0400-\u04FF\d\s\-\(\)\.,\"']+$")
 

@@ -75,8 +75,7 @@ def workout_details(request, pk):
     if client:
         completed_ids = CompletedExercise.objects.filter(
             client=client,
-            workout_exercise__in=exercises,
-            date=selected_date
+            workout_exercise__in=exercises
         ).values_list('workout_exercise_id', flat=True)
 
     context = {

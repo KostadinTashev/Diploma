@@ -4,7 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm, UserChangeForm, UserCr
 from django.db import transaction
 from django.forms import inlineformset_factory
 
-from fitness_app.accounts.models import FitnessUser
+from fitness_app.accounts.models import FitnessUser, Gender
 from fitness_app.clients.models import Client
 from fitness_app.meals.models import Meal, Product
 from fitness_app.program_exercises.models import ProgramExercise
@@ -69,6 +69,11 @@ class CustomUserChangeForm(UserChangeForm):
 
 
 class CustomUserCreationForm(UserCreationForm):
+    make_admin = forms.BooleanField(  # ✔ отметка
+        label="Администратор",
+        required=False,
+        help_text="Ако е маркирано – потребителят ще има пълен достъп.",
+    )
     class Meta:
         model = FitnessUser
         fields = ['username', 'first_name', 'last_name', 'email', 'birth_date', 'gender', 'profile_picture',
@@ -78,7 +83,17 @@ class CustomUserCreationForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
+    def save(self, commit=True):
+        user = super().save(commit=False)
 
+        if self.cleaned_data.get("make_admin"):
+            user.is_staff = True
+            user.is_superuser = True
+
+        if commit:
+            user.save()
+
+        return user
 
 class CustomUserEditForm(forms.ModelForm):
     password1 = forms.CharField(
@@ -125,6 +140,14 @@ class CustomUserEditForm(forms.ModelForm):
 
 
 class TrainerForm(CustomUserCreationForm):
+    make_admin = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields.pop('make_admin', None)
+
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})
     speciality = forms.ChoiceField(
         choices=SpecialityType.choices(),
         label="Специалност",
@@ -163,7 +186,11 @@ class TrainerForm(CustomUserCreationForm):
 
     @transaction.atomic
     def save(self, commit=True):
-        user = super().save(commit=True)
+        user = super(CustomUserCreationForm, self).save(commit=False)
+        user.is_staff = False
+        user.is_superuser = False
+        if commit:
+            user.save()
 
         Trainer.objects.create(
             user=user,
@@ -173,7 +200,6 @@ class TrainerForm(CustomUserCreationForm):
             bio=self.cleaned_data["bio"],
             phone_number=self.cleaned_data["phone_number"],
         )
-
         return user
 
     # def __init__(self, *args, **kwargs):
@@ -181,7 +207,79 @@ class TrainerForm(CustomUserCreationForm):
     #
     #     self.fields['user'].widget = forms.HiddenInput()
 
+class TrainerAdminEditForm(forms.ModelForm):
+    username       = forms.CharField(label="Потребителско име")
+    first_name     = forms.CharField(label="Име",  required=False)
+    last_name      = forms.CharField(label="Фамилия", required=False)
+    email          = forms.EmailField(label="Имейл", required=False)
+    birth_date     = forms.DateField(label="Дата на раждане", required=False,
+                                     widget=forms.DateInput(attrs={"type": "date"}))
+    gender = forms.ChoiceField(
+        label="Пол",
+        choices=Gender.choices(),
+        required=False,
+    )
+    profile_picture = forms.ImageField(label="Профилна снимка", required=False)
 
+    speciality            = forms.ChoiceField(
+        label="Специалност",
+        choices=SpecialityType.choices(),
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    years_of_experience   = forms.IntegerField(label="Години опит", min_value=0)
+    certifications        = forms.CharField(label="Сертификати", required=False)
+    bio                   = forms.CharField(label="Биография", required=False,
+                                            widget=forms.Textarea(attrs={"rows": 3}))
+    phone_number          = forms.CharField(label="Телефонен номер", required=False)
+
+    class Meta:
+        model  = Trainer
+        fields = (
+            "username", "first_name", "last_name", "email",
+            "birth_date", "gender", "profile_picture",
+            "speciality", "years_of_experience",
+            "certifications", "bio", "phone_number",
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        user = getattr(self.instance, "user", None)
+        if user:
+            self.fields["username"].initial        = user.username
+            self.fields["first_name"].initial      = user.first_name
+            self.fields["last_name"].initial       = user.last_name
+            self.fields["email"].initial           = user.email
+            self.fields["birth_date"].initial      = user.birth_date
+            self.fields["gender"].initial          = user.gender
+            self.fields["profile_picture"].initial = user.profile_picture
+
+        # Бърз клас за Bootstrap
+        for f in self.fields.values():
+            f.widget.attrs.setdefault("class", "form-control")
+
+    @transaction.atomic
+    def save(self, commit=True):
+        trainer = super().save(commit=False)   # полетата на Trainer
+
+        # Актуализираме FitnessUser
+        user = trainer.user
+        user.username        = self.cleaned_data["username"]
+        user.first_name      = self.cleaned_data["first_name"]
+        user.last_name       = self.cleaned_data["last_name"]
+        user.email           = self.cleaned_data["email"]
+        user.birth_date      = self.cleaned_data["birth_date"]
+        user.gender          = self.cleaned_data["gender"]
+        if self.cleaned_data.get("profile_picture"):
+            user.profile_picture = self.cleaned_data["profile_picture"]
+
+        if commit:
+            user.save()
+            trainer.save()
+        else:
+            pass
+
+        return trainer
 class UserProfilePictureForm(forms.ModelForm):
     class Meta:
         model = FitnessUser
@@ -280,4 +378,4 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model  = Product
         fields = ['name', 'calories_per_100g', 'carbohydrates_per_100g',
-                  'fats_per_100g', 'proteins_per_100g', 'serving_size']
+                  'fats_per_100g', 'proteins_per_100g']

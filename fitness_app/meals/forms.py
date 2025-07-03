@@ -105,3 +105,23 @@ class FoodItemAddForm(forms.Form):
         if not Product.objects.filter(name__iexact=name).exists():
             raise forms.ValidationError("Невалиден продукт.")
         return name
+
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = [
+            "name",
+            "calories_per_100g",
+            "carbohydrates_per_100g",
+            "fats_per_100g",
+            "proteins_per_100g",
+            # "serving_size",
+        ]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "form-control"}),
+            # "serving_size": forms.TextInput(attrs={"class": "form-control"}),
+            "calories_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.1"}),
+            "carbohydrates_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.1"}),
+            "fats_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.1"}),
+            "proteins_per_100g": forms.NumberInput(attrs={"class": "form-control", "step": "0.1"}),
+        }

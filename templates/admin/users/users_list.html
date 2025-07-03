@@ -18,6 +18,7 @@
                     <th>Имейл</th>
                     <th>Роля</th>
                     <th>Активен</th>
+                    <th>Последно влизане</th>
                     <th>Действия</th>
                 </tr>
                 </thead>
@@ -27,6 +28,7 @@
                         <td>{{ user.id }}</td>
                         <td>{{ user.username }}</td>
                         <td>{{ user.email }}</td>
+
                         <td>
                             {% if user.is_superuser %}
                                 <span class="badge bg-danger">Администратор</span>
@@ -38,6 +40,7 @@
                                 <span class="badge bg-secondary">Неопределен</span>
                             {% endif %}
                         </td>
+
                         <td>
                             {% if user.is_active %}
                                 <span class="text-success fw-semibold">Да</span>
@@ -45,11 +48,16 @@
                                 <span class="text-danger fw-semibold">Не</span>
                             {% endif %}
                         </td>
+
+                        <td>
+                            {{ user.last_login|date:"d.m.Y H:i" |default:"–" }}
+                        </td>
+
                         <td>
                             <a href="{% url 'admin user details' user.id %}" class="btn btn-sm btn-outline-primary">Детайли</a>
                             <a href="{% url 'admin user edit' user.id %}" class="btn btn-sm btn-outline-warning">Редактирай</a>
 
-                            {% if user.id != request.user.id %}
+                            {% if user.id != request.user.id and not user.is_superuser %}
                                 <form method="post" action="{% url 'admin user toggle' user.id %}"
                                       style="display:inline-block;">
                                     {% csrf_token %}
@@ -57,17 +65,17 @@
                                         {% if user.is_active %}Деактивирай{% else %}Активирай{% endif %}
                                     </button>
                                 </form>
-
                             {% endif %}
 
                             {% if not user.is_superuser and not user.is_trainer %}
-                                <a href="{% url 'admin user delete' user.id %}" class="btn btn-sm btn-outline-danger">Изтрий</a>
+                                <a href="{% url 'admin user delete' user.id %}"
+                                   class="btn btn-sm btn-outline-danger">Изтрий</a>
                             {% endif %}
-
                         </td>
                     </tr>
                 {% endfor %}
                 </tbody>
+
             </table>
         </div>
     </div>

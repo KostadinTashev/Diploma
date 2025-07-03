@@ -1,19 +1,15 @@
-# docker-compose.yml   (Compose v2+ – без "version:")
 services:
   web:
     build: .
     command: gunicorn fitness_app.wsgi:application --bind 0.0.0.0:8000
-
-    # .env трябва да съдържа DB_NAME / DB_USER / DB_PASSWORD и т.н.
     env_file:
       - .env
-
-    volumes:
-      - .:/app               # кодът на проекта
-
     ports:
-      - "8000:8000"          # достъп на http://localhost:8000
-
-    # 👉 само за Linux-хостове; под Windows не е нужно
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - ./media:/app/media
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+volumes:
+  static_volume:

@@ -3,6 +3,7 @@ from datetime import date
 import logging
 
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.forms import formset_factory
 from django.http import HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
@@ -11,7 +12,7 @@ from django.shortcuts import render
 from django.utils.timezone import now
 from django.views.decorators.http import require_POST
 
-from .forms import FoodItemForm, MealForm, ItemFormSet, MealEntryForm, FoodItemEntryForm, FoodItemAddForm
+from .forms import FoodItemForm, MealForm, ItemFormSet, MealEntryForm, FoodItemEntryForm, FoodItemAddForm, ProductForm
 from .models import Meal, FoodItem, Product
 from ..clients.models import Client
 
@@ -38,7 +39,6 @@ def calorie_calculator(request):
                 if form.cleaned_data and not form.cleaned_data.get('DELETE', False):
                     product_name = form.cleaned_data['product_name']
                     quantity = form.cleaned_data['quantity']
-
 
                     products = Product.objects.filter(name__iexact=product_name)
                     count = products.count()
@@ -164,6 +164,7 @@ def meal_history(request, client_id=None):
         'is_trainer': is_trainer,
         'trainer_id': trainer_id,
     })
+
 
 def all_meals(request):
     meals = Meal.objects.all()
@@ -302,3 +303,95 @@ def delete_meal_client(request, meal_id):
     meal = get_object_or_404(Meal, id=meal_id, client=client)
     meal.delete()
     return redirect('calorie calculator')
+
+
+@login_required
+def product_list(request):
+    q = request.GET.get("q", "").strip()
+    sort = request.GET.get("sort", "name")  # по подразбиране сортираме по име
+    allowed_sort = {
+        "name": "name",
+        "-name": "-name",
+        "cal": "calories_per_100g",
+        "-cal": "-calories_per_100g",
+        "pro": "proteins_per_100g",
+        "-pro": "-proteins_per_100g",
+        "carb": "carbohydrates_per_100g",
+        "-carb": "-carbohydrates_per_100g",
+        "fat": "fats_per_100g",
+        "-fat": "-fats_per_100g",
+    }
+    order_clause = allowed_sort.get(sort, "name")  # fallback
+
+    qs = Product.objects.all()
+    if q:
+        qs = qs.filter(name__icontains=q)
+
+    products = qs.order_by(order_clause)
+
+    paginator = Paginator(products, 100)  # 100 на страница
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        "products": page_obj,  # съдържа само текущата страница
+        "page_obj": page_obj,
+        "sort": sort,
+        "q": q,
+    }
+    return render(request, "meals/product_list.html", context)
+
+
+@login_required
+def product_detail(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    client = getattr(request.user, "client", None)
+    trainer = getattr(request.user, "trainer", None)
+
+    can_manage = (
+            request.user.is_staff
+            or request.user.is_superuser
+            or trainer is not None
+    )
+
+    context = {
+        "product": product,
+        "client": client,
+        "trainer": trainer,
+        "can_manage": can_manage,
+    }
+    return render(request, "meals/product_detail.html", context)
+
+
+@login_required
+def product_create(request):
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("product list")
+    else:
+        form = ProductForm()
+    return render(request, "meals/product_create.html", {"form": form})
+
+
+@login_required
+def product_update(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=product)
+        if form.is_valid():
+            form.save()
+            return redirect("product detail", pk=pk)
+    else:
+        form = ProductForm(instance=product)
+    return render(request, "meals/product_edit.html", {"form": form, "product": product})
+
+
+@login_required
+def product_delete(request, pk):
+    product = get_object_or_404(Product, pk=pk)
+    if request.method == "POST":
+        product.delete()
+        return redirect("product list")
+    return render(request, "meals/product_confirm_delete.html", {"product": product})

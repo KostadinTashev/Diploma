@@ -1,4 +1,4 @@
-{% extends 'base/base-admin.html' %}
+{% extends "base/base-admin.html" %}
 {% block page_content %}
 <div class="container mt-5">
     <h2 class="mb-4">Редакция на треньор</h2>
@@ -6,25 +6,18 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <div class="mb-4">
-            <h5 class="text-primary">Профилна снимка</h5>
-            {% if trainer.user.profile_picture %}
-                <img src="{{ trainer.user.profile_picture.url }}" alt="Снимка"
-                     class="img-thumbnail mb-2" style="max-height: 150px;">
-            {% endif %}
-            {{ user_form.profile_picture.label_tag }}
-            {{ user_form.profile_picture }}
-            {% if user_form.profile_picture.errors %}
-                <div class="text-danger small">{{ user_form.profile_picture.errors|join:", " }}</div>
-            {% endif %}
-        </div>
+        {# профилна снимка ако съществува #}
+        {% if trainer.user.profile_picture %}
+            <img src="{{ trainer.user.profile_picture.url }}"
+                 alt="Снимка" class="img-thumbnail mb-3" style="max-height: 150px;">
+        {% endif %}
 
-        <hr>
-
-        {% for field in trainer_form %}
+        {% for field in form %}
             <div class="mb-3">
-                <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}:</label>
-                {{ field }}
+                {{ field.label_tag }} {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
                 {% if field.errors %}
                     <div class="text-danger small">{{ field.errors|join:", " }}</div>
                 {% endif %}

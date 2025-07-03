@@ -3,17 +3,17 @@
 
 {% block page_content %}
     <div class="container py-5">
-        {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm"
-                         role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Затвори"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
+{#        {% if messages %}#}
+{#            <div class="mb-4">#}
+{#                {% for message in messages %}#}
+{#                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm"#}
+{#                         role="alert">#}
+{#                        {{ message }}#}
+{#                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Затвори"></button>#}
+{#                    </div>#}
+{#                {% endfor %}#}
+{#            </div>#}
+{#        {% endif %}#}
         <h2 class="text-center fw-bold text-primary mb-5">
             <i class="bi bi-people-fill"></i> Всички треньори
         </h2>

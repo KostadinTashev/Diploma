@@ -1,0 +1,35 @@
+{% extends "base/base-admin.html" %}
+{% block page_content %}
+<div class="container py-4" style="max-width: 720px;">
+
+  <a href="{% url 'admin products list' %}"
+     class="btn btn-outline-secondary btn-sm rounded-pill fw-semibold mb-3">
+      <i class="bi bi-arrow-left"></i> Назад
+  </a>
+
+  <h2 class="fw-bold text-dark mb-3">{{ product.name }}</h2>
+
+  <p class="text-muted fst-italic">
+      * Стойностите са за 100&nbsp;g продукт.
+  </p>
+
+  <table class="table table-bordered">
+    <tbody>
+      <tr><th>Калории (kcal)</th><td>{{ product.calories_per_100g|default:"-" }}</td></tr>
+      <tr><th>Протеини (g)</th><td>{{ product.proteins_per_100g|default:"-" }}</td></tr>
+      <tr><th>Въглехидрати (g)</th><td>{{ product.carbohydrates_per_100g|default:"-" }}</td></tr>
+      <tr><th>Мазнини (g)</th><td>{{ product.fats_per_100g|default:"-" }}</td></tr>
+    </tbody>
+  </table>
+
+  <div class="d-flex justify-content-between mt-4">
+      <a href="{% url 'admin product edit' product.pk %}" class="btn btn-primary">
+          <i class="bi bi-pencil-square"></i> Редакция
+      </a>
+      <a href="{% url 'admin product delete' product.pk %}" class="btn btn-danger">
+          <i class="bi bi-trash"></i> Изтриване
+      </a>
+  </div>
+
+</div>
+{% endblock %}

@@ -12,6 +12,7 @@ from django.templatetags.static import static
 from django.urls import reverse_lazy, reverse
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.paginator import Paginator
 
 from django.views import generic as views, View
 from django.contrib.auth import views as auth_views, logout, get_user_model, login
@@ -19,12 +20,14 @@ from django.views.generic import CreateView
 
 from fitness_app.accounts.forms import RegisterUserForm, CustomUserCreationForm, TrainerForm, UserProfilePictureForm, \
     ClientForm, MealAdminForm, CustomUserEditForm, WorkoutAdminForm, WorkoutExerciseFormAdminSet, \
-    ProgramExerciseAdminForm, ProductForm
+    ProgramExerciseAdminForm, ProductForm, TrainerAdminEditForm
 from fitness_app.accounts.models import FitnessUser
 from fitness_app.clients.models import Client, AppReview
 from fitness_app.exercises.forms import ExerciseAddForm
 from fitness_app.exercises.models import User, Exercise, ExerciseCategory
-from fitness_app.meals.models import Meal, MealType, Product
+from fitness_app.meals.models import Meal, MealType, Product, FoodItem
+from fitness_app.nutrition_plans.forms import NutritionPlanForm, MealFormAddSet, NutritionPlanEditForm, MealFormEditSet, \
+    FoodItemFormAddSet, FoodFormEditSet
 from fitness_app.nutrition_plans.models import NutritionPlan
 from fitness_app.program_exercises.models import ProgramExercise
 from fitness_app.progress.forms import ProgressForm
@@ -169,9 +172,12 @@ def admin_user_edit(request, user_id):
             form.save()
             return redirect('admin user details', user_id=user.id)
     else:
-        form = CustomUserCreationForm(instance=user)
+        form = CustomUserEditForm(instance=user)
 
-    return render(request, 'admin/users/user_edit.html', {'form': form, 'user': user})
+    return render(request, 'admin/users/user_edit.html', {
+        'form': form,
+        'user': user,
+    })
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -222,27 +228,22 @@ def admin_trainer_create(request):
         form = TrainerForm()
     return render(request, "admin/trainers/create.html", {"form": form})
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def admin_trainer_edit(request, trainer_id):
     trainer = get_object_or_404(Trainer, pk=trainer_id)
-    user = trainer.user
 
-    if request.method == 'POST':
-        trainer_form = TrainerForm(request.POST, instance=trainer)
-        user_form = UserProfilePictureForm(request.POST, request.FILES, instance=user)
-
-        if trainer_form.is_valid() and user_form.is_valid():
-            trainer_form.save()
-            user_form.save()
-            return redirect('admin trainer details', trainer_id=trainer.id)
+    if request.method == "POST":
+        form = TrainerAdminEditForm(request.POST, request.FILES, instance=trainer)
+        if form.is_valid():
+            form.save()
+            return redirect("admin trainer details", trainer_id=trainer.id)
     else:
-        trainer_form = TrainerForm(instance=trainer)
-        user_form = UserProfilePictureForm(instance=user)
+        form = TrainerAdminEditForm(instance=trainer)
 
-    return render(request, 'admin/trainers/edit.html', {
-        'trainer_form': trainer_form,
-        'user_form': user_form,
-        'trainer': trainer,
+    return render(request, "admin/trainers/edit.html", {
+        "form": form,
+        "trainer": trainer,
     })
 
 
@@ -521,12 +522,15 @@ def reject_review(request, review_id):
     review.delete()
     return redirect('admin reviews list')
 
+
 @user_passes_test(lambda u: u.is_superuser)
 def admin_workouts_list(request):
     workouts = Workout.objects.all()
     return render(request, 'admin/workouts/list.html', {
         'workouts': workouts
     })
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def admin_workout_details(request, workout_id):
     workout = get_object_or_404(
@@ -542,23 +546,25 @@ def admin_workout_details(request, workout_id):
         'workout': workout,
         'assigned_clients': assigned_clients,
     })
+
+
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def admin_workout_create(request):
     if request.method == "POST":
-        w_form  = WorkoutAdminForm(request.POST)
+        w_form = WorkoutAdminForm(request.POST)
         ex_fset = WorkoutExerciseFormAdminSet(request.POST)
 
         if w_form.is_valid() and ex_fset.is_valid():
-            workout = w_form.save()           # 1. записваме тренировката
-            ex_fset.instance = workout        # 2. закачаме я към formset-а
-            ex_fset.save()                    # 3. записваме упражненията
+            workout = w_form.save()
+            ex_fset.instance = workout
+            ex_fset.save()
             return redirect(
                 "admin workout details",
-                workout_id=workout.id,        # ← url(r"…/<int:workout_id>/")
+                workout_id=workout.id,
             )
     else:
-        w_form  = WorkoutAdminForm()
+        w_form = WorkoutAdminForm()
         ex_fset = WorkoutExerciseFormAdminSet()
 
     return render(
@@ -568,16 +574,13 @@ def admin_workout_create(request):
     )
 
 
-# -------------------------------------------------------------------------
-# РЕДАКЦИЯ
-# -------------------------------------------------------------------------
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def admin_workout_edit(request, workout_id):
     workout = get_object_or_404(Workout, pk=workout_id)
 
     if request.method == "POST":
-        w_form  = WorkoutAdminForm(request.POST, instance=workout)
+        w_form = WorkoutAdminForm(request.POST, instance=workout)
         ex_fset = WorkoutExerciseFormAdminSet(request.POST, instance=workout)
 
         if w_form.is_valid() and ex_fset.is_valid():
@@ -588,7 +591,7 @@ def admin_workout_edit(request, workout_id):
                 workout_id=workout.id,
             )
     else:
-        w_form  = WorkoutAdminForm(instance=workout)
+        w_form = WorkoutAdminForm(instance=workout)
         ex_fset = WorkoutExerciseFormAdminSet(instance=workout)
 
     return render(
@@ -602,16 +605,16 @@ def admin_workout_edit(request, workout_id):
 @transaction.atomic()
 def admin_workout_create(request):
     if request.method == "POST":
-        w_form  = WorkoutForm(request.POST)
+        w_form = WorkoutForm(request.POST)
         ex_fset = WorkoutExerciseFormSet(request.POST)
 
         if w_form.is_valid() and ex_fset.is_valid():
             workout = w_form.save()
-            ex_fset.instance = workout      # закача новия родител
+            ex_fset.instance = workout
             ex_fset.save()
             return redirect("admin workout details", workout_id=workout.id)
     else:
-        w_form  = WorkoutAdminForm()
+        w_form = WorkoutAdminForm()
         ex_fset = WorkoutExerciseFormAdminSet()
 
     return render(
@@ -619,6 +622,8 @@ def admin_workout_create(request):
         "admin/workouts/create.html",
         {"form": w_form, "formset": ex_fset},
     )
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def admin_workout_delete(request, workout_id):
     workout = get_object_or_404(Workout, pk=workout_id)
@@ -626,7 +631,8 @@ def admin_workout_delete(request, workout_id):
         workout.delete()
         return redirect('admin workouts list')
     return render(request, 'admin/workouts/delete.html', {'workout': workout})
-# *** LIST ***
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def admin_program_list(request):
     programs = (ProgramExercise.objects
@@ -635,7 +641,6 @@ def admin_program_list(request):
     return render(request, "admin/programs/list.html", {"programs": programs})
 
 
-# *** CREATE ***
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def admin_program_create(request):
@@ -650,7 +655,6 @@ def admin_program_create(request):
                   {"form": form, "title": "Създай назначение"})
 
 
-# *** DETAILS ***
 @user_passes_test(lambda u: u.is_superuser)
 def admin_program_details(request, pk):
     program = get_object_or_404(
@@ -660,7 +664,6 @@ def admin_program_details(request, pk):
                   {"program": program})
 
 
-# *** EDIT ***
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def admin_program_edit(request, pk):
@@ -676,7 +679,6 @@ def admin_program_edit(request, pk):
                   {"form": form, "title": "Редакция на назначение"})
 
 
-# *** DELETE ***
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def admin_program_delete(request, pk):
@@ -686,16 +688,68 @@ def admin_program_delete(request, pk):
         return redirect("admin program list")
     return render(request, "admin/programs/delete.html",
                   {"program": program})
+
+
 @user_passes_test(lambda u: u.is_superuser)
 def admin_products_list(request):
-    query = request.GET.get("q", "")
-    qs = Product.objects.all().order_by("name")
-    if query:
-        qs = qs.filter(name__icontains=query)
-    return render(request, "admin/products/list.html", {"products": qs, "query": query})
+    sort = request.GET.get("sort", "name")
+
+    allowed = {
+        "name": "name",
+        "-name": "-name",
+        "cal": "calories_per_100g",
+        "-cal": "-calories_per_100g",
+        "pro": "proteins_per_100g",
+        "-pro": "-proteins_per_100g",
+        "carb": "carbohydrates_per_100g",
+        "-carb": "-carbohydrates_per_100g",
+        "fat": "fats_per_100g",
+        "-fat": "-fats_per_100g",
+    }
+    order_clause = allowed.get(sort, "name")
+
+    products_qs = Product.objects.order_by(order_clause)
+
+    base_cols = [
+        ("name", "Име", "start"),
+        ("cal", "Ккал", "end"),
+        ("pro", "Протеини", "end"),
+        ("carb", "Въглехидрати", "end"),
+        ("fat", "Мазнини", "end"),
+    ]
+
+    cols = []
+    for code, label, align in base_cols:
+        if sort == code:
+            next_code, arrow = f"-{code}", "▲"
+        elif sort == f"-{code}":
+            next_code, arrow = code, "▼"
+        else:
+            next_code, arrow = code, ""
+        cols.append({
+            "label": label,
+            "arrow": arrow,
+            "next": next_code,
+            "align": f"text-{align}",
+        })
+
+    q = request.GET.get("q", "").strip()
+    if q:
+        products_qs = products_qs.filter(name__icontains=q)
+
+    from django.core.paginator import Paginator
+    page_obj = Paginator(products_qs, 100).get_page(request.GET.get("page"))
+
+    context = {
+        "products": page_obj,
+        "page_obj": page_obj,
+        "cols": cols,
+        "sort": sort,
+        "q": q,
+    }
+    return render(request, "admin/products/list.html", context)
 
 
-# CREATE ───────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 def admin_product_create(request):
     form = ProductForm(request.POST or None)
@@ -706,14 +760,12 @@ def admin_product_create(request):
     return render(request, "admin/products/create.html", {"form": form})
 
 
-# DETAILS ──────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 def admin_product_details(request, pk):
     product = get_object_or_404(Product, pk=pk)
-    return render(request, "admin/products/details.html", {"product": product})
+    return render(request, "admin/products/detail.html", {"product": product})
 
 
-# EDIT ─────────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 def admin_product_edit(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -725,7 +777,6 @@ def admin_product_edit(request, pk):
     return render(request, "admin/products/edit.html", {"form": form, "product": product})
 
 
-# DELETE ───────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 def admin_product_delete(request, pk):
     product = get_object_or_404(Product, pk=pk)
@@ -735,119 +786,185 @@ def admin_product_delete(request, pk):
         return redirect("admin products list")
     return render(request, "admin/products/delete.html", {"product": product})
 
-# @user_passes_test(lambda u: u.is_superuser)
-# def admin_meals_list(request):
-#     meals = Meal.objects.select_related("plan", "client").order_by("-date")
-#     return render(request, "admin/meals/list.html", {"meals": meals})
-#
-#
-# # CREATE ───────────────────────────────────────────────────────────
-# @user_passes_test(lambda u: u.is_superuser)
-# @transaction.atomic
-# def admin_meal_create(request):
-#     meal_form   = MealForm(request.POST or None)
-#     items_fset  = ItemFormSet(request.POST or None)
-#
-#     if request.method == "POST" and meal_form.is_valid() and items_fset.is_valid():
-#         meal = meal_form.save()
-#         items_fset.instance = meal
-#         items_fset.save()
-#         messages.success(request, "Храненето е добавено.")
-#         return redirect("admin meal details", meal_id=meal.id)
-#
-#     return render(request, "admin/meals/create.html",
-#                   {"form": meal_form, "formset": items_fset})
-#
-#
-# # DETAILS ──────────────────────────────────────────────────────────
-# @user_passes_test(lambda u: u.is_superuser)
-# def admin_meal_details(request, meal_id):
-#     meal = get_object_or_404(Meal.objects.select_related("plan", "client"), pk=meal_id)
-#     return render(request, "admin/meals/details.html", {"meal": meal})
-#
-#
-# # EDIT ─────────────────────────────────────────────────────────────
-# @user_passes_test(lambda u: u.is_superuser)
-# @transaction.atomic
-# def admin_meal_edit(request, meal_id):
-#     meal        = get_object_or_404(Meal, pk=meal_id)
-#     meal_form   = MealForm(request.POST or None, instance=meal)
-#     items_fset  = ItemFormSet(request.POST or None, instance=meal)
-#
-#
-#     if request.method == "POST" and meal_form.is_valid() and items_fset.is_valid():
-#         meal_form.save()
-#         items_fset.save()
-#         messages.success(request, "Промените са запазени.")
-#         return redirect("admin meal details", meal_id=meal.id)
-#
-#     return render(request, "admin/meals/edit.html",
-#                   {"form": meal_form, "formset": items_fset, "meal": meal})
-#
-#
-# # DELETE ───────────────────────────────────────────────────────────
-# @user_passes_test(lambda u: u.is_superuser)
-# def admin_meal_delete(request, meal_id):
-#     meal = get_object_or_404(Meal, pk=meal_id)
-#     if request.method == "POST":
-#         meal.delete()
-#         messages.success(request, "Храненето беше изтрито.")
-#         return redirect("admin meals list")
-#     return render(request, "admin/meals/delete.html", {"meal": meal})
+
 @user_passes_test(lambda u: u.is_superuser)
 def admin_plans_list(request):
-    plans = NutritionPlan.objects.select_related("client").order_by("client__user__first_name")
-    return render(request, "admin/plans/list.html", {"plans": plans})
+    clients = Client.objects.select_related("user").prefetch_related("nutrition_plans")
+    return render(request, "admin/plans/list.html", {"clients": clients})
 
 
-# CREATE ───────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def admin_plan_create(request):
-    plan_form  = NutritionPlanForm(request.POST or None)
-    meal_fset  = MealFormAddSet(request.POST or None, queryset=Meal.objects.none())
+    client_id = request.GET.get("client")
+    preselected_client = (
+        get_object_or_404(Client, pk=client_id) if client_id else None
+    )
 
-    if request.method == "POST" and plan_form.is_valid() and meal_fset.is_valid():
-        plan = plan_form.save()
-        meal_fset.instance = plan
-        meal_fset.save()
-        messages.success(request, "Хранителният план е създаден.")
-        return redirect("admin plan detail", pk=plan.pk)
+    if request.method == "POST":
+        plan_form = NutritionPlanForm(request.POST)
+        meal_fset = MealFormAddSet(request.POST, prefix="meals")
 
-    return render(request, "admin/plans/create.html",
-                  {"form": plan_form, "meal_fset": meal_fset})
+        food_fsets, valid = [], plan_form.is_valid() and meal_fset.is_valid()
+        for i, meal_form in enumerate(meal_fset):
+            prefix = f"foods-{i}"
+            fs = FoodItemFormAddSet(
+                request.POST,
+                prefix=prefix,
+                instance=meal_form.instance if meal_form.instance.pk else None,
+            )
+            food_fsets.append(fs)
+            if not fs.is_valid():
+                valid = False
+
+        if valid:
+            plan = plan_form.save(commit=False)
+            if preselected_client:
+                plan.client = preselected_client
+            plan.save()
+
+            meals = meal_fset.save(commit=False)
+            for i, meal in enumerate(meals):
+                meal.plan = plan
+                meal.save()
+                food_fsets[i].instance = meal
+                food_fsets[i].save()
+
+            return redirect("admin plan detail", pk=plan.pk)
+
+    else:
+        initial = {"client": preselected_client} if preselected_client else None
+        plan_form = NutritionPlanForm(initial=initial)
+
+        meal_fset = MealFormAddSet(queryset=Meal.objects.none(), prefix="meals")
+        food_fsets = [
+            FoodItemFormAddSet(prefix="foods-0", queryset=FoodItem.objects.none())
+        ]
+
+    context = {
+        "is_edit": False,
+        "plan_form": plan_form,
+        "meal_formset": meal_fset,
+        "food_formsets": food_fsets,
+        "empty_meal_form": MealFormAddSet(
+            queryset=Meal.objects.none(), prefix="meals"
+        ).empty_form,
+        "empty_food_formset": FoodItemFormAddSet(
+            prefix="foods-__prefix__", queryset=FoodItem.objects.none()
+        ),
+        "preselected_client": preselected_client,
+    }
+    return render(request, "admin/plans/create.html", context)
 
 
-# DETAILS ──────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 def admin_plan_details(request, pk):
-    plan = get_object_or_404(
-        NutritionPlan.objects.prefetch_related("meals__food_items__product"), pk=pk
+    plan = (
+        NutritionPlan.objects
+        .select_related("client__user")
+        .prefetch_related("meals__food_items__product")
+        .get(pk=pk)
     )
-    return render(request, "admin/plans/details.html", {"plan": plan})
+
+    meals_by_day: dict[str, list] = {}
+    for meal in plan.meals.all().order_by("date"):
+        formatted = meal.date.strftime("%d %B %Y")
+        meals_by_day.setdefault(formatted, []).append({
+            "meal": meal.meal,
+            "description": meal.description,
+            "calories": meal.calories,
+            "carbohydrate": meal.carbohydrate,
+            "fats": meal.fats,
+            "proteins": meal.proteins,
+            "products": meal.food_items.all(),
+        })
+
+    return render(
+        request,
+        "admin/plans/details.html",
+        {"plan": plan, "meals_by_day": meals_by_day},
+    )
 
 
-# EDIT ─────────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 @transaction.atomic
 def admin_plan_edit(request, pk):
-    plan       = get_object_or_404(NutritionPlan, pk=pk)
-    plan_form  = NutritionPlanEditForm(request.POST or None, instance=plan)
-    meal_fset  = MealFormEditSet(request.POST or None, instance=plan)
+    plan = get_object_or_404(
+        NutritionPlan.objects.select_related("client__user"), pk=pk
+    )
 
-    if request.method == "POST" and plan_form.is_valid() and meal_fset.is_valid():
-        plan_form.save()
-        meal_fset.save()        # самите Meal-ове
-        # вътрешни FoodItem-и на всеки Meal (nested) – ако ти трябва,
-        #     обхождаш meal_fset.forms и пускаш FoodFormEditSet за всеки Meal
-        messages.success(request, "Планът е обновен.")
-        return redirect("admin plan detail", pk=plan.pk)
+    if request.method == "POST":
+        print("\n==========  PLAN EDIT DEBUG  ==========")
 
-    return render(request, "admin/plans/edit.html",
-                  {"form": plan_form, "meal_fset": meal_fset, "plan": plan})
+        plan_form = NutritionPlanForm(request.POST, instance=plan)
+        meal_fset = MealFormEditSet(request.POST, instance=plan, prefix="meals")
+
+        food_fsets = []
+        for m_form in meal_fset.forms:
+            idx = m_form.prefix.split("-")[-1]
+            food_fsets.append(
+                FoodFormEditSet(
+                    request.POST,
+                    instance=m_form.instance,
+                    prefix=f"foods-{idx}",
+                )
+            )
+
+        forms_valid = (
+                plan_form.is_valid()
+                and meal_fset.is_valid()
+                and all(fs.is_valid() for fs in food_fsets)
+        )
+
+        print(f"✔ plan_form.valid? {plan_form.is_valid()}")
+        print(f"✔ meal_fset.valid?  {meal_fset.is_valid()}")
+        for i, fs in enumerate(food_fsets):
+            print(f"✔ food_fsets[{i}].valid? {fs.is_valid()}")
+
+        if forms_valid:
+            print("ALL forms valid – committing to DB.")
+            with transaction.atomic():
+                plan = plan_form.save()
+
+                meal_fset.save()
+
+                for m_form, fs in zip(meal_fset.forms, food_fsets):
+                    if m_form.cleaned_data.get("DELETE"):
+                        continue
+                    fs.instance = m_form.instance
+                    fs.save()
+
+            print("==========  END DEBUG (valid) ==========\n")
+            messages.success(request, "Режимът беше обновен успешно.")
+            return redirect("admin plan detail", pk=plan.pk)
+
+        print("==========  END DEBUG (invalid)  ==========\n")
+        messages.error(request, "Моля, коригирай грешките във формата.")
+
+    else:
+        plan_form = NutritionPlanForm(instance=plan)
+        meal_fset = MealFormEditSet(instance=plan, prefix="meals")
+        food_fsets = [
+            FoodFormEditSet(instance=m.instance, prefix=f"foods-{i}")
+            for i, m in enumerate(meal_fset.forms)
+        ]
+
+    context = {
+        "is_edit": True,
+        "plan": plan,
+        "plan_form": plan_form,
+        "meal_formset": meal_fset,
+        "food_formsets": food_fsets,
+        "empty_meal_form": MealFormAddSet(
+            queryset=Meal.objects.none(), prefix="meals"
+        ).empty_form,
+        "empty_food_formset": FoodItemFormAddSet(
+            prefix="foods-__prefix__", queryset=FoodItem.objects.none()
+        ),
+    }
+    return render(request, "admin/plans/create.html", context)
 
 
-# DELETE ───────────────────────────────────────────────────────────
 @user_passes_test(lambda u: u.is_superuser)
 def admin_plan_delete(request, pk):
     plan = get_object_or_404(NutritionPlan, pk=pk)

@@ -115,65 +115,90 @@
     ];
 
     const sections = [
-        {
-            icon: "people-fill",
-            title: "Потребители",
-            description: "Управлявай регистрираните потребители.",
-            color: "primary",
-            link: "{% url 'admin users list' %}"
-        },
-        {
-            icon: "person-badge",
-            title: "Треньори",
-            description: "Редактирай информацията за треньорите.",
-            color: "success",
-            link: "{% url 'admin trainers list' %}"
-        },
-        {
-            icon: "person",
-            title: "Клиенти",
-            description: "Достъп до клиентските профили.",
-            color: "warning",
-            link: "{% url 'admin clients list' %}"
-        },
-        {
-            icon: "person",
-            title: "Отзиви",
-            description: "Достъп до клиентските отзиви.",
-            color: "warning",
-            link: "{% url 'admin reviews list' %}"
-        },
-        {
-            icon: "bar-chart-fill",
-            title: "Прогреси",
-            description: "Прегледай данни за напредъка на клиентите.",
-            color: "info",
-            link: "{% url 'admin progress list' %}"
-        },
-        {
-            icon: "dumbbell",
-            title: "Упражнения",
-            description: "Управление на упражнения.",
-            color: "secondary",
-            link: "{% url 'admin exercises list' %}"
-        },
-        {
-            icon: "person",
-            title: "Тренировки",
-            description: "Достъп до тренировките.",
-            color: "warning",
-            link: "{% url 'admin workouts list' %}"
-        },
+    {
+        icon: "people-fill",
+        title: "Потребители",
+        description: "Управлявай регистрираните потребители.",
+        color: "primary",
+        link: "{% url 'admin users list' %}"
+    },
 
-        {
-            icon: "calendar-check",
-            title: "Назначения",
-            description: "Кой клиент коя тренировка изпълнява и кога.",
-            color: "info",
-            link: "{% url 'admin program list' %}"
-        },
+    {
+        icon: "person-badge",
+        title: "Треньори",
+        description: "Редактирай информацията за треньорите.",
+        color: "success",
+        link: "{% url 'admin trainers list' %}"
+    },
+    {
+        icon: "person-fill",
+        title: "Клиенти",
+        description: "Достъп до клиентските профили.",
+        color: "warning",
+        link: "{% url 'admin clients list' %}"
+    },
 
-    ];
+    {
+        icon: "egg-fried",
+        title: "Хранителни режими",
+        description: "Създавай и редактирай хранителни планове.",
+        color: "danger",
+        link: "{% url 'admin plans list' %}"
+    },
+    {
+        icon: "journal-medical",
+        title: "Хранения",
+        description: "Добавяй и преглеждай хранения.",
+        color: "info",
+        link: "{% url 'admin meals list' %}"
+    },
+    {
+        icon: "basket2-fill",
+        title: "Продукти",
+        description: "Каталог с хранителни продукти.",
+        color: "secondary",
+        link: "{% url 'admin products list' %}"
+    },
+
+    {
+        icon: "dumbbell",
+        title: "Упражнения",
+        description: "Управление на упражнения.",
+        color: "secondary",
+        link: "{% url 'admin exercises list' %}"
+    },
+    {
+        icon: "person",
+        title: "Тренировки",
+        description: "Достъп до тренировките.",
+        color: "warning",
+        link: "{% url 'admin workouts list' %}"
+    },
+
+    {
+        icon: "bar-chart-fill",
+        title: "Прогреси",
+        description: "Прегледай данни за напредъка на клиентите.",
+        color: "info",
+        link: "{% url 'admin progress list' %}"
+    },
+    {
+        icon: "chat-dots-fill",
+        title: "Отзиви",
+        description: "Модерирай клиентските отзиви.",
+        color: "warning",
+        link: "{% url 'admin reviews list' %}"
+    },
+
+    {
+        icon: "calendar-check",
+        title: "Програми",
+        description: "Кой клиент коя тренировка изпълнява и кога.",
+        color: "success",
+        link: "{% url 'admin program list' %}"
+    }
+];
+
 
     const statsContainer = document.getElementById("stats-container");
     const sectionsContainer = document.getElementById("sections-container");

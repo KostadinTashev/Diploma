@@ -163,7 +163,6 @@ def dashboard(request, client_id, username):
 #     trainer = get_object_or_404(Trainer, id=trainer_id)
 #     client = request.user.client
 #
-#     # директна смяна
 #     client.trainer = trainer
 #     client.save()
 #

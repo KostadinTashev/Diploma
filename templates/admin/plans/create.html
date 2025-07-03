@@ -1,0 +1,281 @@
+{% extends "base/base-admin.html" %}
+{% load custom_filters %}
+{% load form_tags  %}
+
+{% block page_content %}
+<div class="container py-5">
+
+  <div class="d-flex align-items-center justify-content-between mb-4">
+      <a href="{% url 'admin plans list' %}"
+         class="btn btn-outline-secondary btn-sm rounded-pill fw-semibold">
+          <i class="bi bi-arrow-left"></i> Назад
+      </a>
+
+      {% if is_edit %}
+        <h2 class="mb-0 text-primary fw-bold">
+            <i class="bi bi-pencil-square"></i> Редакция: {{ plan.name }}
+        </h2>
+      {% else %}
+        <h2 class="mb-0 text-success fw-bold">
+            <i class="bi bi-plus-circle-fill"></i> Нов хранителен режим
+        </h2>
+      {% endif %}
+
+      <span></span>
+  </div>
+
+  <form method="post" id="nutrition-form" class="card p-4 shadow-lg" novalidate>
+      {% csrf_token %}
+
+      <div class="row g-3">
+          <div class="col-md-6">
+              {{ plan_form.client.label_tag }}
+              {{ plan_form.client|add_class:"form-select" }}
+          </div>
+          <div class="col-md-6">
+              {{ plan_form.name.label_tag }}
+              {{ plan_form.name|add_class:"form-control" }}
+          </div>
+          <div class="col-12">
+              {{ plan_form.description.label_tag }}
+              {{ plan_form.description|add_class:"form-control" }}
+          </div>
+
+          <div class="col-md-3">
+              {{ plan_form.calories.label_tag }}
+              {{ plan_form.calories|add_class:"form-control" }}
+          </div>
+          <div class="col-md-3">
+              {{ plan_form.carbohydrate.label_tag }}
+              {{ plan_form.carbohydrate|add_class:"form-control" }}
+          </div>
+          <div class="col-md-3">
+              {{ plan_form.fats.label_tag }}
+              {{ plan_form.fats|add_class:"form-control" }}
+          </div>
+          <div class="col-md-3">
+              {{ plan_form.proteins.label_tag }}
+              {{ plan_form.proteins|add_class:"form-control" }}
+          </div>
+      </div>
+
+      <hr class="my-4">
+
+      <h3 class="mb-2">Добави хранения</h3>
+      {{ meal_formset.management_form }}
+
+      <div id="meals-container">
+          {% for meal_form in meal_formset %}
+            {% with idx=forloop.counter0 food_formset=food_formsets|index:forloop.counter0 %}
+            <div class="meal-block mb-4" data-index="{{ idx }}">
+              <button type="button" class="remove-meal-btn btn btn-danger btn-sm float-end">🗑</button>
+              <h4>Хранене {{ forloop.counter }}</h4>
+
+              <div class="row g-3">
+                  <div class="col-md-4">
+                      {{ meal_form.meal.label_tag }} {{ meal_form.meal|add_class:"form-select" }}
+                  </div>
+                  <div class="col-md-4">
+                      {{ meal_form.date.label_tag }} {{ meal_form.date|add_class:"form-control" }}
+                  </div>
+                  <div class="col-md-4">
+                      {{ meal_form.description.label_tag }} {{ meal_form.description|add_class:"form-control" }}
+                  </div>
+                  {{ meal_form.id }} {{ meal_form.DELETE|add_class:"delete-checkbox" }}
+              </div>
+
+              <hr>
+              {{ food_formset.management_form }}
+              <h5>Продукти:</h5>
+              <div class="food-items-container">
+                  {% for f in food_formset %}
+                    {% with p=f.prefix %}
+                    <div class="food-item bg-light p-2 rounded mb-2">
+                      <div class="row g-2 align-items-end">
+    {{ f.id }}
+    <div class="col-md-6">
+        <label for="{{ p }}-product_name">Продукт</label>
+        <input type="text" class="form-control product-name-input"
+               id="{{ p }}-product_name"
+               value="{{ f.instance.product.name|default_if_none:'' }}">
+        {{ f.product.as_hidden }}
+    </div>
+
+<div class="col-md-4">
+    {{ f.quantity.label_tag }}
+    {{ f.quantity|add_class:"form-control" }}
+</div>
+                          <div class="col-md-2 text-end">
+                              <button type="button" class="remove-food-btn btn btn-outline-danger btn-sm mt-md-0 mt-2">✖</button>
+                              <input type="checkbox" name="{{ p }}-DELETE" class="delete-checkbox d-none">
+                          </div>
+                      </div>
+                    </div>
+                    {% endwith %}
+                  {% endfor %}
+              </div>
+
+              <button type="button"
+                      class="add-food-btn btn btn-outline-success btn-sm mt-2"
+                      data-meal-index="{{ idx }}">➕ Добави продукт</button>
+            </div>
+            {% endwith %}
+          {% endfor %}
+      </div>
+
+      <button type="button" id="add-meal-btn" class="btn btn-primary mt-3">
+          ➕ Добави още хранене
+      </button>
+
+      <button type="submit" class="btn btn-success mt-4 d-block ms-auto">
+          ✅ Запиши режима
+      </button>
+  </form>
+
+  <template id="meal-template">
+      <div class="meal-block mb-4" data-index="__prefix__">
+        <button type="button" class="remove-meal-btn btn btn-danger btn-sm float-end">🗑</button>
+        <h4>Хранене __number__</h4>
+
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label>Тип хранене</label>
+                <select name="meals-__prefix__-meal" id="id_meals-__prefix__-meal" class="form-select">
+                    {% for val,label in empty_meal_form.meal.field.choices %}
+                        <option value="{{ val }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label>Дата</label>
+                <input type="date" name="meals-__prefix__-date"
+                       id="id_meals-__prefix__-date" class="form-control">
+            </div>
+            <div class="col-md-4">
+                <label>Описание</label>
+                <input type="text" name="meals-__prefix__-description"
+                       id="id_meals-__prefix__-description" class="form-control">
+            </div>
+            <input type="hidden" name="meals-__prefix__-id" id="id_meals-__prefix__-id">
+            <input type="checkbox" name="meals-__prefix__-DELETE"
+                   id="id_meals-__prefix__-DELETE" class="delete-checkbox d-none">
+        </div>
+
+        <hr>
+        <input type="hidden" name="foods-__prefix__-TOTAL_FORMS" id="id_foods-__prefix__-TOTAL_FORMS" value="0">
+        <input type="hidden" name="foods-__prefix__-INITIAL_FORMS" value="0">
+        <input type="hidden" name="foods-__prefix__-MIN_NUM_FORMS" value="0">
+        <input type="hidden" name="foods-__prefix__-MAX_NUM_FORMS" value="1000">
+
+        <h5>Продукти:</h5>
+        <div class="food-items-container"></div>
+        <button type="button" class="add-food-btn btn btn-outline-success btn-sm mt-2"
+                data-meal-index="__prefix__">➕ Добави продукт</button>
+      </div>
+  </template>
+
+  <template id="food-template">
+      <div class="food-item bg-light p-2 rounded mb-2">
+        <div class="row g-2 align-items-end">
+    {{ f.id }}
+    <div class="col-md-6">
+        <label for="{{ p }}-product_name">Продукт</label>
+        <input type="text" class="form-control product-name-input"
+               id="{{ p }}-product_name"
+               value="{{ f.instance.product.name|default_if_none:'' }}">
+        {{ f.product.as_hidden }}
+    </div>
+            <div class="col-md-4">
+                <label>Количество</label>
+                <input type="number" min="1" class="form-control"
+                       name="__prefix__-quantity" id="__prefix__-quantity">
+            </div>
+            <div class="col-md-2 text-end">
+                <button type="button" class="remove-food-btn btn btn-outline-danger btn-sm mt-md-0 mt-2">✖</button>
+                <input type="checkbox" name="__prefix__-DELETE" class="delete-checkbox d-none">
+            </div>
+        </div>
+      </div>
+  </template>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script>
+(function(){
+  function activateAutocomplete() {
+      $(".product-name-input").autocomplete({
+          source:function(req,res){
+              $.getJSON("{% url 'autocomplete products' %}",{term:req.term},function(data){
+                  res($.map(data,function(it){return {label:it.name,value:it.name,id:it.id};}));
+              });
+          },
+          minLength:1,
+          select:function(e,ui){
+              $(this).val(ui.item.value);
+              $(this).siblings(".product-id-input").val(ui.item.id);
+              return false;
+          },
+          change:function(e,ui){
+              if(!ui.item){$(this).siblings(".product-id-input").val("");}
+          }
+      });
+  }
+  activateAutocomplete();
+
+  function renumberMeals(){
+      $('.meal-block').each(function(i){
+          $(this).attr('data-index',i);
+          $(this).find('h4').text('Хранене '+(i+1));
+          $(this).find('.add-food-btn').attr('data-meal-index',i);
+      });
+  }
+
+  $('#add-meal-btn').click(function(){
+      const idx=parseInt($('#id_meals-TOTAL_FORMS').val());
+      let html=$('#meal-template').html()
+          .replace(/__prefix__/g,idx)
+          .replace(/__number__/g,idx+1);
+      $('#meals-container').append(html);
+      $('#id_meals-TOTAL_FORMS').val(idx+1);
+      activateAutocomplete();
+  });
+
+  $('#meals-container').on('click','.remove-meal-btn',function(){
+      const block=$(this).closest('.meal-block');
+      const chk=block.find('.delete-checkbox');
+      if(chk.length){chk.prop('checked',true);block.hide();}
+      else{block.remove();$('#id_meals-TOTAL_FORMS').val($('.meal-block').length);}
+      renumberMeals();
+  });
+
+  $('#meals-container').on('click','.add-food-btn',function(){
+      const mIdx=$(this).data('meal-index');
+      const container=$(`.meal-block[data-index="${mIdx}"] .food-items-container`);
+      const totalInput=$(`#id_foods-${mIdx}-TOTAL_FORMS`);
+      if(!totalInput.length)return;
+      const count=parseInt(totalInput.val());
+      const prefix=`foods-${mIdx}-${count}`;
+      let html=$('#food-template').html().replace(/__prefix__/g,prefix);
+      container.append(html);
+      totalInput.val(count+1);
+      activateAutocomplete();
+  });
+
+  $('#meals-container').on('click','.remove-food-btn',function(){
+      const item=$(this).closest('.food-item');
+      const chk=item.find('.delete-checkbox');
+      if(chk.length){chk.prop('checked',true);item.hide();}
+      else{item.remove();}
+  });
+})();
+</script>
+
+<style>
+.meal-block{border:1px solid #dee2e6;border-radius:10px;padding:20px;transition:transform .2s}
+.meal-block:hover{transform:scale(1.01)}
+.food-item label{font-size:.9rem;font-weight:500}
+.delete-checkbox{display:none!important}
+</style>
+{% endblock %}
